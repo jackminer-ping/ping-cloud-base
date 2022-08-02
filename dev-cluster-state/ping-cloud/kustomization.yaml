@@ -489,13 +489,13 @@ patchesStrategicMerge:
         containers:
           - name: pingdirectory
             volumeMounts:
-              - name: pd-test-user
+              - name: pingdirectory-auth-certs
                 mountPath: /usr/local/secrets/auth_certs
                 readOnly: true
         volumes:
-          - name: pd-test-user
+          - name: pingdirectory-auth-certs
             secret:
-              secretName: pd-test-user
+              secretName: pingdirectory-auth-certs
               optional: true
               defaultMode: 0400
 
