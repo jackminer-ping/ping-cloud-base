@@ -5,3 +5,7 @@ SERVER_PROFILE_PATH=profiles/pingdirectory
 
 # Changes PURGE_BATCH_SIZE for -Dcom.unboundid.directory.server.plugins.PurgeExpiredDataPlugin.BATCH_SIZE= - default is 10000
 PURGE_BATCH_SIZE=10000
+
+# Add auth certs here to enable X.509-based authentication via SASL
+# More info here: https://confluence.pingidentity.com/display/proserv/Enabling+X.509+Authentication+with+PingDirectory
+PD_X509_AUTH_CERTS=""

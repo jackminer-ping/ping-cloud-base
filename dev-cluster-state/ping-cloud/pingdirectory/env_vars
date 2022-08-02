@@ -3,5 +3,4 @@ SERVER_PROFILE_PATH=profiles/${CONFIG_PARENT_DIR}/pingdirectory
 
 OPTIMIZE_REPLACE_PROFILE=true
 
-PD_AUTH_CERTS=pd-test-user pd-test-user-two
-
+PD_X509_AUTH_CERTS=""

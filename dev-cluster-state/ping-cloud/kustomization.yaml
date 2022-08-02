@@ -3,7 +3,6 @@ apiVersion: kustomize.config.k8s.io/v1beta1
 
 resources:
 - ../../k8s-configs/ping-cloud
-- secrets.yaml
 
 configMapGenerator:
 
@@ -464,39 +463,3 @@ patchesStrategicMerge:
   data:
     descriptor.json: |-
       ${TOPOLOGY_DESCRIPTOR}
-<<<<<<< HEAD
-=======
-
-
-- |-
-  apiVersion: batch/v1
-  kind: CronJob
-  metadata:
-    name: healthcheck-cluster-health
-  spec: 
-    schedule: "@hourly"
-
-- |-
-  apiVersion: apps/v1
-  kind: StatefulSet
-  metadata:
-    name: pingdirectory
-    labels:
-      class: pingdirectory-server
-  spec:
-    template:
-      spec:
-        containers:
-          - name: pingdirectory
-            volumeMounts:
-              - name: pingdirectory-auth-certs
-                mountPath: /usr/local/secrets/auth_certs
-                readOnly: true
-        volumes:
-          - name: pingdirectory-auth-certs
-            secret:
-              secretName: pingdirectory-auth-certs
-              optional: true
-              defaultMode: 0400
-
->>>>>>> 8605d071 ([skip ci] changes to kustomize for testing only)
