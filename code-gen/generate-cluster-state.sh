@@ -997,6 +997,10 @@ for ENV_OR_BRANCH in ${ENVIRONMENTS}; do
   ENV_PROFILES_DIR="${PROFILES_DIR}/${ENV_OR_BRANCH}"
   mkdir -p "${ENV_PROFILES_DIR}"
 
+  ###### ---- ALL FEATURE FLAGS GO HERE ----- #######
+  pgo_feature_flag "${K8S_CONFIGS_DIR}/common/base/cluster-tools/kustomization.yaml"
+  ###################################################
+
   cp -pr ../profiles/aws/. "${ENV_PROFILES_DIR}"
 
   if test "${ENV}" = "${CUSTOMER_HUB}"; then
