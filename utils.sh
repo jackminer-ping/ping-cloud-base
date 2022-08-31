@@ -579,13 +579,22 @@ get_ssm_value() {
   fi
 }
 
-# Check if we are in gitlab
-# Returns 0 if true, 1 if false
-check_in_gitlab() {
-  if [[ ${CI_SERVER} == "yes" ]]; then
+# Return 0 if darwin (macOS), 1 otherwise
+check_macos() {
+  if [[ "$(uname)" =~ "Darwin" ]]; then
     return 0
+  else
+    return 1
   fi
-  return 1
+}
+
+# In-place sed is different on macOS vs other linux distros
+get_in_place_sed_command() {
+  if check_macos; then
+    echo "sed -i ''"
+  else
+    echo "sed -i"
+  fi
 }
 
 # Deploy PGO - only if the feature flag is enabled!
@@ -604,16 +613,12 @@ pgo_dev_deploy() {
     kubectl apply --server-side -k "${pgo_crd_dir}"
   else
     log "FEATURE FLAG - PF Provisioning is disabled, REMOVING references from ${kust_file}"
-    sed_command="sed -i ''"
-    if check_in_gitlab; then
-      sed_command="sed"
-    fi
+    sed_command=$(get_in_place_sed_command)
     ${sed_command} '/^resources:$/d' "${kust_file}"
     ${sed_command} '/^- .*base$/d' "${kust_file}"
     ${sed_command} '/^- .*pf-provisioning$/d' "${kust_file}"
     ${sed_command} '/^patches:$/d' "${kust_file}"
     ${sed_command} '/^- .*remove-crds.yaml$/d' "${kust_file}"
-
   fi
 }
 
@@ -626,8 +631,9 @@ pgo_feature_flag() {
     # TODO: this should not be here - it should be up a level
     log "FEATURE FLAG - PF Provisioning is disabled, REMOVING"
     # Remove pgo resources from kustomize - pgo must be at the end of the line, start with '- '
-    sed -i '' '/^resources:$/d' "${kust_file}"
-    sed -i '' '/^- .*base$/d' "${kust_file}"
-    sed -i '' '/^- .*pf-provisioning$/d' "${kust_file}"
+    sed_command=$(get_in_place_sed_command)
+    ${sed_command} '/^resources:$/d' "${kust_file}"
+    ${sed_command} '/^- .*base$/d' "${kust_file}"
+    ${sed_command} '/^- .*pf-provisioning$/d' "${kust_file}"
   fi
 }
