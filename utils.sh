@@ -503,6 +503,8 @@ build_dev_deploy_file() {
   local dev_cluster_state_dir='dev-cluster-state'
   cp -pr "${dev_cluster_state_dir}" "${build_dir}"
 
+  pgo_dev_deploy "${build_dir}"
+
   substitute_vars "${build_dir}" "${DEFAULT_VARS}"
   set_kustomize_load_arg_and_value
   kustomize build "${build_load_arg}" "${build_load_arg_value}" "${build_dir}/${cluster_type}" > "${deploy_file}"
@@ -586,8 +588,13 @@ pgo_dev_deploy() {
     log "PF Provisioning is enabled, deploying PGO CRD"
     # PGO CRDs are so large, they have to be applied server-side
     kubectl apply --server-side -k "${pgo_crd_dir}"
+    # Remove base so that we don't try to apply it non-server-side
+    sed -i '' '/- base$/d' "${kust_file}"
   else
-    log "PF Provisioning NOT enabled"
+    log "PGO disabled, removing"
+    sed -i '' '/- resources$/d' "${kust_file}"
+    sed -i '' '/- base$/d' "${kust_file}"
+    sed -i '' '/- pf-provisioning$/d' "${kust_file}"
   fi
 }
 
@@ -599,7 +606,9 @@ pgo_feature_flag() {
   if [[ $PF_PROVISIONING_ENABLED != "true" ]]; then
     # TODO: this should not be here - it should be up a level
     log "PGO disabled, removing"
-    # Remove -pgo from kustomize - pgo must be at the end of the line, start with '- '
-    sed -i '' 's/- .*pgo$//g' "${kust_file}"
+    # Remove pgo resources from kustomize - pgo must be at the end of the line, start with '- '
+    sed -i '' '/- resources$/d' "${kust_file}"
+    sed -i '' '/- base$/d' "${kust_file}"
+    sed -i '' '/- pf-provisioning$/d' "${kust_file}"
   fi
 }
