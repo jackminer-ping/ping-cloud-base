@@ -12,4 +12,7 @@ resources:
 - ../../../k8s-configs/cluster-tools/base/pgo/base
 - ../../../k8s-configs/cluster-tools/base/pgo/pf-provisioning
 
+patches:
+- remove-crds.yaml
+
 ####-------####

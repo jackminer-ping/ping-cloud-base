@@ -1,5 +1,15 @@
+# NOTE - this file is automatically manipulated by generate-cluster.state.sh and dev-env.sh
+# DO NOT modify it directly without taking into account what is being done in those scripts
+
 kind: Kustomization
 apiVersion: kustomize.config.k8s.io/v1beta1
 
+# 'pgo/base' will be removed when this is dev-env in order to apply server-side
+# Entire block will be removed if PGO/PingFederate Provisioning are disabled
+####--Space between blocks may be empty---####
+
 resources:
-- ${K8S_GIT_URL}/k8s-configs/cluster-tools/base/monitoring?ref=${K8S_GIT_BRANCH}
+- ${K8S_GIT_URL}/k8s-configs/cluster-tools/base/pgo/base?ref=${K8S_GIT_BRANCH}
+- ${K8S_GIT_URL}/k8s-configs/cluster-tools/base/pgo/pf-provisioning?ref=${K8S_GIT_BRANCH}
+
+####-------####

@@ -503,12 +503,15 @@ build_dev_deploy_file() {
   local dev_cluster_state_dir='dev-cluster-state'
   cp -pr "${dev_cluster_state_dir}" "${build_dir}"
 
-  pgo_dev_deploy "${build_dir}"
+  pgo_dev_deploy "$(pwd)" "${build_dir}"
 
   substitute_vars "${build_dir}" "${DEFAULT_VARS}"
   set_kustomize_load_arg_and_value
   kustomize build "${build_load_arg}" "${build_load_arg_value}" "${build_dir}/${cluster_type}" > "${deploy_file}"
-  rm -rf "${build_dir}"
+
+  if [[ "${DEBUG}" != "true" ]]; then
+    rm -rf "${build_dir}"
+  fi
 
   test ! -z "${NAMESPACE}" && test "${NAMESPACE}" != 'ping-cloud' &&
       sed -i.bak -E "s/((namespace|name): )ping-cloud$/\1${NAMESPACE}/g" "${deploy_file}"
@@ -580,21 +583,24 @@ get_ssm_value() {
 # Arg $1 - directory containing pgo CRDs
 pgo_dev_deploy() {
   base_dir=${1}
+  build_dir=${2}
 
   # TODO: move CRD files since they won't use kustomize in typical way?
   pgo_crd_dir="${base_dir}/k8s-configs/cluster-tools/base/pgo/base/crd/"
+  kust_file="${build_dir}/cluster-tools/pgo/kustomization.yaml"
 
   if [[ $PF_PROVISIONING_ENABLED == "true" ]]; then
-    log "PF Provisioning is enabled, deploying PGO CRD"
+    log "FEATURE FLAG - PF Provisioning is enabled, deploying PGO CRD"
     # PGO CRDs are so large, they have to be applied server-side
     kubectl apply --server-side -k "${pgo_crd_dir}"
-    # Remove base so that we don't try to apply it non-server-side
-    sed -i '' '/- base$/d' "${kust_file}"
   else
-    log "PGO disabled, removing"
-    sed -i '' '/- resources$/d' "${kust_file}"
-    sed -i '' '/- base$/d' "${kust_file}"
-    sed -i '' '/- pf-provisioning$/d' "${kust_file}"
+    log "FEATURE FLAG - PF Provisioning is disabled, REMOVING references from ${kust_file}"
+    sed -i '' '/^resources:$/d' "${kust_file}"
+    sed -i '' '/^- .*base$/d' "${kust_file}"
+    sed -i '' '/^- .*pf-provisioning$/d' "${kust_file}"
+    sed -i '' '/^patches:$/d' "${kust_file}"
+    sed -i '' '/^- .*remove-crds.yaml$/d' "${kust_file}"
+
   fi
 }
 
@@ -605,10 +611,10 @@ pgo_feature_flag() {
 
   if [[ $PF_PROVISIONING_ENABLED != "true" ]]; then
     # TODO: this should not be here - it should be up a level
-    log "PGO disabled, removing"
+    log "FEATURE FLAG - PF Provisioning is disabled, REMOVING"
     # Remove pgo resources from kustomize - pgo must be at the end of the line, start with '- '
-    sed -i '' '/- resources$/d' "${kust_file}"
-    sed -i '' '/- base$/d' "${kust_file}"
-    sed -i '' '/- pf-provisioning$/d' "${kust_file}"
+    sed -i '' '/^resources:$/d' "${kust_file}"
+    sed -i '' '/^- .*base$/d' "${kust_file}"
+    sed -i '' '/^- .*pf-provisioning$/d' "${kust_file}"
   fi
 }
