@@ -23,7 +23,7 @@ spec:
         pg_hba:
         # Attempt to allow pf-provisioning user to connect to pf-provisioning db from anywhere
         # TODO: change from trust
-          - "host pf-provisioning pf-provisioning 0.0.0.0/0 trust"
+          - "host pf-provisioning pf-provisioning 0.0.0.0/0 md5"
   # users:
   #   - name: pf_service
   #   - name: support
