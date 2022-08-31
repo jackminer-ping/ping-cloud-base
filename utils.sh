@@ -579,6 +579,15 @@ get_ssm_value() {
   fi
 }
 
+# Check if we are in gitlab
+# Returns 0 if true, 1 if false
+check_in_gitlab() {
+  if [[ ${CI_SERVER} == "yes" ]]; then
+    return 0
+  fi
+  return 1
+}
+
 # Deploy PGO - only if the feature flag is enabled!
 # Arg $1 - directory containing pgo CRDs
 pgo_dev_deploy() {
@@ -595,11 +604,15 @@ pgo_dev_deploy() {
     kubectl apply --server-side -k "${pgo_crd_dir}"
   else
     log "FEATURE FLAG - PF Provisioning is disabled, REMOVING references from ${kust_file}"
-    sed -i '' '/^resources:$/d' "${kust_file}"
-    sed -i '' '/^- .*base$/d' "${kust_file}"
-    sed -i '' '/^- .*pf-provisioning$/d' "${kust_file}"
-    sed -i '' '/^patches:$/d' "${kust_file}"
-    sed -i '' '/^- .*remove-crds.yaml$/d' "${kust_file}"
+    sed_command="sed -i ''"
+    if check_in_gitlab; then
+      sed_command="sed"
+    fi
+    ${sed_command} '/^resources:$/d' "${kust_file}"
+    ${sed_command} '/^- .*base$/d' "${kust_file}"
+    ${sed_command} '/^- .*pf-provisioning$/d' "${kust_file}"
+    ${sed_command} '/^patches:$/d' "${kust_file}"
+    ${sed_command} '/^- .*remove-crds.yaml$/d' "${kust_file}"
 
   fi
 }
