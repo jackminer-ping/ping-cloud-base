@@ -1,5 +1,5 @@
-# NOTE - this file is automatically manipulated by generate-cluster.state.sh and dev-env.sh
-# DO NOT modify it directly without taking into account what is being done in those scripts
+# NOTE - this file is automatically manipulated by dev-env.sh
+# DO NOT modify it directly without taking into account what is being done that script
 
 kind: Kustomization
 apiVersion: kustomize.config.k8s.io/v1beta1
@@ -12,6 +12,7 @@ resources:
 - ../../../k8s-configs/cluster-tools/base/pgo/base
 - ../../../k8s-configs/cluster-tools/base/pgo/pf-provisioning
 
+# Remove the CRDs from the dev environments so that they can be applied server-side
 patches:
 - remove-crds.yaml
 

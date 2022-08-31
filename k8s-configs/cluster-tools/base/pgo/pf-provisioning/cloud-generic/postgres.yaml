@@ -1,0 +1,43 @@
+# NOTE: image and postgres version will need to updated manually according to support in the
+# postgres-operator-examples repo: https://github.com/CrunchyData/postgres-operator-examples/blob/main/kustomize/postgres/postgres.yaml
+apiVersion: postgres-operator.crunchydata.com/v1beta1
+kind: PostgresCluster
+metadata:
+  name: pf-provisioning
+spec:
+  image: registry.developers.crunchydata.com/crunchydata/crunchy-postgres:ubi8-14.5-0
+  postgresVersion: 14
+  instances:
+    - name: instance1
+      dataVolumeClaimSpec:
+        storageClassName: pgo-gp2
+        accessModes:
+        - "ReadWriteOnce"
+        resources:
+          requests:
+            # TODO: higher default
+            storage: 1Gi
+  patroni:
+    dynamicConfiguration:
+      postgresql:
+        pg_hba:
+        # Attempt to allow pf-provisioning user to connect to pf-provisioning db from anywhere
+        # TODO: change from trust
+          - "host pf-provisioning pf-provisioning 0.0.0.0/0 trust"
+  # users:
+  #   - name: pf_service
+  #   - name: support
+  backups:
+    pgbackrest:
+      image: registry.developers.crunchydata.com/crunchydata/crunchy-pgbackrest:ubi8-2.40-0
+      repos:
+      - name: repo1
+        volume:
+          volumeClaimSpec:
+            storageClassName: pgo-gp2
+            accessModes:
+            - "ReadWriteOnce"
+            resources:
+              requests:
+                # TODO: higher default
+                storage: 1Gi

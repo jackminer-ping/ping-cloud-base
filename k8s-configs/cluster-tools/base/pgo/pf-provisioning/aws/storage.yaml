@@ -1,0 +1,20 @@
+apiVersion: storage.k8s.io/v1
+kind: StorageClass
+metadata:
+  name: pgo-gp2
+# TODO: determine if we need to change the volume type/request IOPS/etc.
+parameters:
+  encrypted: "true"
+  fsType: ext4
+  # Use gp3 once we install the ebs csi driver for EKS 1.23
+  type: gp2
+# Pretty confident we don't need this - runs TRIM command, can't find it documented anywhere
+# if this is actually needed for EBS volumes, especially SSDs. It appears to have been part of
+# the beluga code since the very beginning...
+# mountOptions:
+#   - discard
+# Consider changing reclaimPolicy to Retain, it may make it easier to recover from accidental deletions?
+# https://faun.pub/kubernetes-how-to-set-reclaimpolicy-for-persistentvolumeclaim-7eb7d002bb2e
+reclaimPolicy: Delete
+provisioner: kubernetes.io/aws-ebs
+volumeBindingMode: WaitForFirstConsumer
