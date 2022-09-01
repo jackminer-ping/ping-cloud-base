@@ -8,3 +8,22 @@ resources:
   # TODO: just the default PGO namespace for now
   - namespace
   - default
+
+# Patch the CRDs such that argocd will sync them properly
+patchesJson6902:
+  - target:
+      version: v1
+      kind: CustomResourceDefinition
+      name: postgresclusters.postgres-operator.crunchydata.com
+    patch: |-
+      - op: add
+        path: /metadata/annotations/argocd.argoproj.io~1sync-options
+        value: "Replace=true"
+  - target:
+      version: v1
+      kind: CustomResourceDefinition
+      name: pgupgrades.postgres-operator.crunchydata.com
+    patch: |-
+      - op: add
+        path: /metadata/annotations/argocd.argoproj.io~1sync-options
+        value: "Replace=true"
