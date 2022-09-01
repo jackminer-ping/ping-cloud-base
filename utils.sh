@@ -614,11 +614,11 @@ pgo_dev_deploy() {
   else
     log "FEATURE FLAG - PF Provisioning is disabled, REMOVING references from ${kust_file}"
     sed_command=$(get_in_place_sed_command)
-    ${sed_command} '/^resources:$/d' "${kust_file}"
-    ${sed_command} '/^- .*base$/d' "${kust_file}"
-    ${sed_command} '/^- .*pf-provisioning$/d' "${kust_file}"
-    ${sed_command} '/^patches:$/d' "${kust_file}"
-    ${sed_command} '/^- .*remove-crds.yaml$/d' "${kust_file}"
+    eval "${sed_command} '/^resources:$/d' ${kust_file}"
+    eval "${sed_command} '/^- .*base$/d' ${kust_file}"
+    eval "${sed_command} '/^- .*pf-provisioning$/d' ${kust_file}"
+    eval "${sed_command} '/^patches:$/d' ${kust_file}"
+    eval "${sed_command} '/^- .*remove-crds.yaml$/d' ${kust_file}"
   fi
 }
 
@@ -631,9 +631,11 @@ pgo_feature_flag() {
     # TODO: this should not be here - it should be up a level
     log "FEATURE FLAG - PF Provisioning is disabled, REMOVING from ${kust_file}"
     # Remove pgo resources from kustomize - pgo must be at the end of the line, start with '- '
+    set -x
     sed_command=$(get_in_place_sed_command)
-    ${sed_command} '/^resources:$/d' "${kust_file}"
-    ${sed_command} '/^- .*pgo\/base/d' "${kust_file}"
-    ${sed_command} '/^- .*pgo\/pf-provisioning/d' "${kust_file}"
+    eval "${sed_command} '/^resources:$/d' ${kust_file}"
+    eval "${sed_command} '/^- .*pgo\/base/d' ${kust_file}"
+    eval "${sed_command} '/^- .*pgo\/pf-provisioning/d' ${kust_file}"
+    set +x
   fi
 }
