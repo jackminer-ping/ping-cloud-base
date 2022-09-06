@@ -631,11 +631,9 @@ pgo_feature_flag() {
     # TODO: this should not be here - it should be up a level
     log "FEATURE FLAG - PF Provisioning is disabled, REMOVING from ${kust_file}"
     # Remove pgo resources from kustomize - pgo must be at the end of the line, start with '- '
-    set -x
     sed_command=$(get_in_place_sed_command)
     eval "${sed_command} '/^resources:$/d' ${kust_file}"
     eval "${sed_command} '/^- .*pgo\/base/d' ${kust_file}"
     eval "${sed_command} '/^- .*pgo\/pf-provisioning/d' ${kust_file}"
-    set +x
   fi
 }
