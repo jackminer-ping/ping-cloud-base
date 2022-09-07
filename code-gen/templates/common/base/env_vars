@@ -227,8 +227,8 @@ PROMETHEUS_USER_COUNT_4_SCHEDULE='* * * * *'
 PROMETHEUS_PING_NAMESPACE=${PING_CLOUD_NAMESPACE}
 
 #### FEATURE FLAGS #####################################################################################################
-#### Set to true to enable
-# PF Provisioning is disabled by default, uncomment to enable
-#PF_PROVISIONING_ENABLED=true
+#### Set to true to enable, most are disabled by default
+
+PF_PROVISIONING_ENABLED=${PF_PROVISIONING_ENABLED}
 
 ########################################################################################################################
