@@ -580,60 +580,73 @@ get_ssm_value() {
 }
 
 # Return 0 if darwin (macOS), 1 otherwise
-check_macos() {
-  if [[ "$(uname)" =~ "Darwin" ]]; then
-    return 0
-  else
-    return 1
-  fi
-}
+# check_macos() {
+#   if [[ "$(uname)" =~ "Darwin" ]]; then
+#     return 0
+#   else
+#     return 1
+#   fi
+# }
 
-# In-place sed is different on macOS vs other linux distros
-get_in_place_sed_command() {
-  if check_macos; then
-    echo "sed -i ''"
-  else
-    echo "sed -i"
-  fi
-}
+# # In-place sed is different on macOS vs other linux distros
+# get_in_place_sed_command() {
+#   if check_macos; then
+#     echo "sed -i ''"
+#   else
+#     echo "sed -i"
+#   fi
+# }
 
 # Deploy PGO - only if the feature flag is enabled!
 # Arg $1 - directory containing pgo CRDs
 pgo_dev_deploy() {
   base_dir=${1}
   build_dir=${2}
+  dry_run=${3}
 
   # TODO: move CRD files since they won't use kustomize in typical way?
   pgo_crd_dir="${base_dir}/k8s-configs/cluster-tools/base/pgo/base/crd/"
   kust_file="${build_dir}/cluster-tools/pgo/kustomization.yaml"
 
   if [[ $PF_PROVISIONING_ENABLED == "true" ]]; then
-    log "FEATURE FLAG - PF Provisioning is enabled, deploying PGO CRD"
+    log "FEATURE FLAG - PF Provisioning is enabled, continuing"
     # PGO CRDs are so large, they have to be applied server-side
-    kubectl apply --server-side -k "${pgo_crd_dir}"
+    #kubectl apply --server-side -k "${pgo_crd_dir}"
   else
-    log "FEATURE FLAG - PF Provisioning is disabled, REMOVING references from ${kust_file}"
-    sed_command=$(get_in_place_sed_command)
-    eval "${sed_command} '/^resources:$/d' ${kust_file}"
-    eval "${sed_command} '/^- .*base$/d' ${kust_file}"
-    eval "${sed_command} '/^- .*pf-provisioning$/d' ${kust_file}"
-    eval "${sed_command} '/^patches:$/d' ${kust_file}"
-    eval "${sed_command} '/^- .*remove-crds.yaml$/d' ${kust_file}"
+    pgo_feature_flag "${kust_file}"
   fi
 }
 
 # Remove PGO from the resource section of the kustomize file, unless the PingFederate
 # Provisioning feature is enabled
+# pgo_feature_flag() {
+#   kust_file="${1}"
+
+#   if [[ $PF_PROVISIONING_ENABLED != "true" ]]; then
+#     log "FEATURE FLAG - PF Provisioning is disabled, REMOVING references from ${kust_file}"
+#     sed_command=$(get_in_place_sed_command)
+#     eval "${sed_command} '/^resources:$/d' ${kust_file}"
+#     eval "${sed_command} '/^- .*base$/d' ${kust_file}"
+#     eval "${sed_command} '/^- .*pf-provisioning$/d' ${kust_file}"
+#     # Patches may/may not exist depending on if it's a dev cluster or not
+#     eval "${sed_command} '/^patches:$/d' ${kust_file}"
+#     eval "${sed_command} '/^- .*remove-crds.yaml$/d' ${kust_file}"
+#   fi
+# }
+
+# Clear the kustomize file, effectively turning off that block of kustomize code
 pgo_feature_flag() {
   kust_file="${1}"
 
   if [[ $PF_PROVISIONING_ENABLED != "true" ]]; then
-    # TODO: this should not be here - it should be up a level
-    log "FEATURE FLAG - PF Provisioning is disabled, REMOVING from ${kust_file}"
-    # Remove pgo resources from kustomize - pgo must be at the end of the line, start with '- '
-    sed_command=$(get_in_place_sed_command)
-    eval "${sed_command} '/^resources:$/d' ${kust_file}"
-    eval "${sed_command} '/^- .*pgo\/base/d' ${kust_file}"
-    eval "${sed_command} '/^- .*pgo\/pf-provisioning/d' ${kust_file}"
+    echo "# PF_PROVISIONING_ENABLED has been set to 'false', therefore this file has been cleared to disable the feature" > "${kust_file}"
+  fi
+}
+
+apply_crds() {
+  if [[ $PF_PROVISIONING_ENABLED != "true" ]]; then
+      log "FEATURE FLAG - PF Provisioning is enabled, deploying PGO CRD"
+    # PGO CRDs are so large, they have to be applied server-side
+    kubectl apply --server-side -k "${pgo_crd_dir}"
   fi
 }

@@ -1,19 +1,12 @@
-# NOTE - this file is automatically manipulated by dev-env.sh
-# DO NOT modify it directly without taking into account what is being done that script
+# NOTE - this file is automatically overwritten by dev-env.sh/utils.sh
+# DO NOT modify it directly without taking into account what is being done in that script
 
 kind: Kustomization
 apiVersion: kustomize.config.k8s.io/v1beta1
 
-# 'base' will be removed when this is dev-env in order to apply server-side
-# Entire block will be removed if PGO/PingFederate Provisioning are disabled
-####--Space between blocks may be empty---####
-
 resources:
 - ../../../k8s-configs/cluster-tools/base/pgo/base
-- ../../../k8s-configs/cluster-tools/base/pgo/pf-provisioning
 
 # Remove the CRDs from the dev environments so that they can be applied server-side
 patches:
 - remove-crds.yaml
-
-####-------####

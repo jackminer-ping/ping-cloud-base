@@ -392,6 +392,8 @@ fi
 build_dev_deploy_file "${DEPLOY_FILE}" "${CLUSTER_TYPE}"
 
 if test "${dryrun}" = 'false'; then
+  # Apply large CRDs depending on feature flags
+  apply_crds
 
   log "Deploying ${DEPLOY_FILE} to cluster ${CLUSTER_NAME}, namespace ${NAMESPACE} for tenant ${TENANT_DOMAIN}"
   kubectl apply -f "${DEPLOY_FILE}" --context "${K8S_CONTEXT}" | tee -a "${LOG_FILE}"
