@@ -998,7 +998,7 @@ for ENV_OR_BRANCH in ${ENVIRONMENTS}; do
   mkdir -p "${ENV_PROFILES_DIR}"
 
   ###### ---- ALL FEATURE FLAGS GO HERE ----- #######
-  pgo_feature_flag "${ENV_DIR}/base/cluster-tools/pgo/kustomization.yaml"
+  pgo_feature_flag "${ENV_DIR}/base/cluster-tools/pgo/kustomization.yaml" "${ENV_DIR}/base/ping-cloud/pingfederate/provisioning/kustomization.yaml"
   ###################################################
 
   cp -pr ../profiles/aws/. "${ENV_PROFILES_DIR}"
