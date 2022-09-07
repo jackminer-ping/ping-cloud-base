@@ -11,6 +11,7 @@ _Changes:_
 - [X] PDO-3823 Add newrelic-metadata pod to send metadata to NewRelic
 - [X] PDO-4104 PA Health Check Tests
 - [X] PDO-4178 Setup NewRelic Kube Events Integration
+- [X] PDO-4290 Add simple postgres operator (PGO) database
 
 ### 1.15.0.0
 
