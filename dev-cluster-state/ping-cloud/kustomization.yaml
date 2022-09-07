@@ -2,9 +2,8 @@ kind: Kustomization
 apiVersion: kustomize.config.k8s.io/v1beta1
 
 resources:
-# This refers to "test" by means of kustomization.yaml within ping-cloud
+# NOTE: The kustomization.yaml under this directory refers to all of the "test" directory
 - ../../k8s-configs/ping-cloud
-- ../../k8s-configs/ping-cloud/base/pingfederate/provisioning
 
 configMapGenerator:
 
