@@ -579,24 +579,6 @@ get_ssm_value() {
   fi
 }
 
-# Return 0 if darwin (macOS), 1 otherwise
-# check_macos() {
-#   if [[ "$(uname)" =~ "Darwin" ]]; then
-#     return 0
-#   else
-#     return 1
-#   fi
-# }
-
-# # In-place sed is different on macOS vs other linux distros
-# get_in_place_sed_command() {
-#   if check_macos; then
-#     echo "sed -i ''"
-#   else
-#     echo "sed -i"
-#   fi
-# }
-
 # Deploy PGO - only if the feature flag is enabled!
 # Arg $1 - directory containing pgo CRDs
 pgo_dev_deploy() {
@@ -616,23 +598,6 @@ pgo_dev_deploy() {
   fi
 }
 
-# Remove PGO from the resource section of the kustomize file, unless the PingFederate
-# Provisioning feature is enabled
-# pgo_feature_flag() {
-#   kust_file="${1}"
-
-#   if [[ $PF_PROVISIONING_ENABLED != "true" ]]; then
-#     log "FEATURE FLAG - PF Provisioning is disabled, REMOVING references from ${kust_file}"
-#     sed_command=$(get_in_place_sed_command)
-#     eval "${sed_command} '/^resources:$/d' ${kust_file}"
-#     eval "${sed_command} '/^- .*base$/d' ${kust_file}"
-#     eval "${sed_command} '/^- .*pf-provisioning$/d' ${kust_file}"
-#     # Patches may/may not exist depending on if it's a dev cluster or not
-#     eval "${sed_command} '/^patches:$/d' ${kust_file}"
-#     eval "${sed_command} '/^- .*remove-crds.yaml$/d' ${kust_file}"
-#   fi
-# }
-
 # Clear the kustomize file, effectively turning off that block of kustomize code
 pgo_feature_flag() {
   pgo_kust_file="${1}"
@@ -646,6 +611,7 @@ pgo_feature_flag() {
   fi
 }
 
+# Apply CRDs server-side to prevent errors around manifest size
 apply_crds() {
   if [[ $PF_PROVISIONING_ENABLED != "true" ]]; then
       log "FEATURE FLAG - PF Provisioning is enabled, deploying PGO CRD"
