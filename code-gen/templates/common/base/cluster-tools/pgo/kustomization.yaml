@@ -1,5 +1,5 @@
-# NOTE - this file is automatically manipulated by generate-cluster.state.sh/update-cluster-state.sh/utils.sh
-# DO NOT modify it directly without taking into account what is being done in those scripts
+### Note: this file may be modified automatically by generate-cluster-state.sh and update-cluster-state.sh
+### DO NOT MODIFY MANUALLY - use feature flag PF_PROVISIONING_ENABLED=true
 
 kind: Kustomization
 apiVersion: kustomize.config.k8s.io/v1beta1
