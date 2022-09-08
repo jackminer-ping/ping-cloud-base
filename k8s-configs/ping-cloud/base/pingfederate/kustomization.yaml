@@ -5,3 +5,5 @@ resources:
 - config
 - admin
 - engine
+# Provisioning, while added here, is automatically removed from the files that reference this kustomization.yaml
+- provisioning
