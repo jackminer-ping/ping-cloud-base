@@ -14,4 +14,3 @@ resources:
 - security
 - pod-reaper
 - health
-- pgo
