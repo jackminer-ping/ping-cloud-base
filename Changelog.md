@@ -12,6 +12,7 @@ _Changes:_
 - [X] PDO-4104 PA Health Check Tests
 - [X] PDO-4178 Setup NewRelic Kube Events Integration
 - [X] PDO-4290 Add simple postgres operator (PGO) database
+- [X] PDO-4261 Upgrade Kustomize to v4.5.7
 
 ### 1.15.0.0
 

@@ -20,19 +20,20 @@ spec:
         - "ReadWriteOnce"
         resources:
           requests:
-            # TODO: higher default
+            # TODO: higher default to be addressed by PDO-3866
             storage: 1Gi
       affinity:
         podAntiAffinity:
           preferredDuringSchedulingIgnoredDuringExecution:
-          - weight: 1
-            podAffinityTerm:
-              topologyKey: kubernetes.io/hostname
-              # TODO standardize this off of Role like elsewhere
-              labelSelector:
-                matchLabels:
-                  postgres-operator.crunchydata.com/cluster: pf-provisioning
-                  postgres-operator.crunchydata.com/instance-set: instance1
+            - weight: 1
+              podAffinityTerm:
+                labelSelector:
+                  matchExpressions:
+                    - key: role
+                      operator: In
+                      values:
+                        - pf-provisioning
+                topologyKey: "failure-domain.beta.kubernetes.io/zone"
   users:
     # Service account used by PingFederate
     - name: pf-service
@@ -43,7 +44,7 @@ spec:
       databases:
         - pf-provisioning
       options: "SUPERUSER"
-  # TODO: Currently, backups go to a separate PVC, this will be fixed in the future to go to S3
+  # TODO: Currently, backups go to a separate PVC, this will be fixed in the future to go to S3 with PDO-3863
   backups:
     pgbackrest:
       image: registry.developers.crunchydata.com/crunchydata/crunchy-pgbackrest:ubi8-2.40-0
@@ -56,5 +57,5 @@ spec:
             - "ReadWriteOnce"
             resources:
               requests:
-                # TODO: higher default
+                # TODO: higher default to be addressed by PDO-3866
                 storage: 1Gi
