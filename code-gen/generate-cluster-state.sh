@@ -832,7 +832,6 @@ mkdir -p "${K8S_CONFIGS_DIR}"
 mkdir -p "${PROFILE_REPO_DIR}"
 
 cp ./update-cluster-state-wrapper.sh "${CLUSTER_STATE_REPO_DIR}"
-cp ./feature-toggle.sh "${CLUSTER_STATE_REPO_DIR}"
 cp ./update-profile-wrapper.sh "${PROFILE_REPO_DIR}"
 
 cp ../.gitignore "${CLUSTER_STATE_REPO_DIR}"
