@@ -164,7 +164,9 @@ PUSH_TO_SERVER="${PUSH_TO_SERVER:-true}"
 PCB_COMMIT_SHA=$(cat "${GENERATED_CODE_DIR}"/pcb-commit-sha.txt)
 
 # Set the git merge strategy to avoid noisy hints in the output.
-git config pull.rebase false
+if [[ ! ${DISABLE_GIT} ]]; then
+  git config pull.rebase false
+fi
 
 # This is a destructive script by design. Add a warning to the user if local changes are being destroyed though.
 CURRENT_BRANCH="$(git rev-parse --abbrev-ref HEAD 2> /dev/null)"

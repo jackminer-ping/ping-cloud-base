@@ -424,10 +424,13 @@ add_derived_variables() {
 add_irsa_variables() {
   echo "Initial IRSA: ${IRSA_PING_ANNOTATION_KEY_VALUE}"
   if test "${IRSA_PING_ANNOTATION_KEY_VALUE}"; then
+    echo "IRSA_PING_ANNOTATION_KEY_VALUE already set, exporting and exiting. Set to: ${IRSA_PING_ANNOTATION_KEY_VALUE}"
     export IRSA_PING_ANNOTATION_KEY_VALUE="${IRSA_PING_ANNOTATION_KEY_VALUE}"
     return
   fi
 
+
+  echo "IRSA_PING_ANNOTATION_KEY_VALUE is not set, trying to find it in SSM..."
   local ssm_path_prefix="$1"
   local env="$2"
 
@@ -446,6 +449,8 @@ add_irsa_variables() {
     IRSA_PING_ANNOTATION_KEY_VALUE="eks.amazonaws.com/role-arn: arn:aws:iam::${ssm_value}:role/pcpt/irsa-roles/irsa-ping"
 
     echo "IRSA set to: ${IRSA_PING_ANNOTATION_KEY_VALUE}"
+  else
+    echo "SSM is set to 'unused', setting IRSA_PING_ANNOTATION_KEY_VALUE to ${IRSA_PING_ANNOTATION_KEY_VALUE}"
   fi
 
   export IRSA_PING_ANNOTATION_KEY_VALUE="${IRSA_PING_ANNOTATION_KEY_VALUE}"
