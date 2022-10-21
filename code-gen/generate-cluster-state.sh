@@ -422,6 +422,7 @@ add_derived_variables() {
 #   ${2} -> The environment name.
 ########################################################################################################################
 add_irsa_variables() {
+  echo "Initial IRSA: ${IRSA_PING_ANNOTATION_KEY_VALUE}"
   if test "${IRSA_PING_ANNOTATION_KEY_VALUE}"; then
     export IRSA_PING_ANNOTATION_KEY_VALUE="${IRSA_PING_ANNOTATION_KEY_VALUE}"
     return
@@ -443,6 +444,8 @@ add_irsa_variables() {
 
     # IRSA for ping product pods. The role name is predefined as a part of the interface contract.
     IRSA_PING_ANNOTATION_KEY_VALUE="eks.amazonaws.com/role-arn: arn:aws:iam::${ssm_value}:role/pcpt/irsa-roles/irsa-ping"
+
+    echo "IRSA set to: ${IRSA_PING_ANNOTATION_KEY_VALUE}"
   fi
 
   export IRSA_PING_ANNOTATION_KEY_VALUE="${IRSA_PING_ANNOTATION_KEY_VALUE}"
