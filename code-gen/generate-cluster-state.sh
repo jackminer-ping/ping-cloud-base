@@ -424,7 +424,7 @@ add_derived_variables() {
 add_irsa_variables() {
   echo "Initial IRSA: ${IRSA_PING_ANNOTATION_KEY_VALUE}"
   if test "${IRSA_PING_ANNOTATION_KEY_VALUE}"; then
-    echo "IRSA_PING_ANNOTATION_KEY_VALUE already set, exporting and exiting. Set to: ${IRSA_PING_ANNOTATION_KEY_VALUE}"
+    echo "IRSA_PING_ANNOTATION_KEY_VALUE already set, exporting and exiting. Set to: '${IRSA_PING_ANNOTATION_KEY_VALUE}'"
     export IRSA_PING_ANNOTATION_KEY_VALUE="${IRSA_PING_ANNOTATION_KEY_VALUE}"
     return
   fi
@@ -450,7 +450,7 @@ add_irsa_variables() {
 
     echo "IRSA set to: ${IRSA_PING_ANNOTATION_KEY_VALUE}"
   else
-    echo "SSM is set to 'unused', setting IRSA_PING_ANNOTATION_KEY_VALUE to ${IRSA_PING_ANNOTATION_KEY_VALUE}"
+    echo "SSM is set to 'unused', setting IRSA_PING_ANNOTATION_KEY_VALUE to '${IRSA_PING_ANNOTATION_KEY_VALUE}'"
   fi
 
   export IRSA_PING_ANNOTATION_KEY_VALUE="${IRSA_PING_ANNOTATION_KEY_VALUE}"
