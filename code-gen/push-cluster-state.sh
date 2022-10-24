@@ -183,13 +183,13 @@ fi
 REMOTE_BRANCHES=""
 
 # Get a list of the remote branches from the server.
-if [[ ! ${DISABLE_GIT} ]]; then 
+if [[ ! ${DISABLE_GIT} ]]; then
   git pull &> /dev/null
   REMOTE_BRANCHES="$(git ls-remote --quiet --heads 2> /dev/null)"
   LS_REMOTE_EXIT_CODE=$?
 
   if test ${LS_REMOTE_EXIT_CODE} -ne 0; then
-  echo "WARN: Unable to retrieve remote branches from the server. Exit code: ${LS_REMOTE_EXIT_CODE}"
+    echo "WARN: Unable to retrieve remote branches from the server. Exit code: ${LS_REMOTE_EXIT_CODE}"
   fi
 fi
 
