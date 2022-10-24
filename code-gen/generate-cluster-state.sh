@@ -416,43 +416,42 @@ add_derived_variables() {
 
 ########################################################################################################################
 # Export IRSA annotation for the provided environment.
+# TODO: this funtion should be deduplicated with all other set/get variable functions
 #
 # Arguments
 #   ${1} -> The SSM path prefix which stores CDE account IDs of Ping Cloud environments.
 #   ${2} -> The environment name.
 ########################################################################################################################
 add_irsa_variables() {
-  echo "Initial IRSA: ${IRSA_PING_ANNOTATION_KEY_VALUE}"
+  local ssm_path_prefix="$1"
+  local env="$2"
+
   if test "${IRSA_PING_ANNOTATION_KEY_VALUE}"; then
-    echo "IRSA_PING_ANNOTATION_KEY_VALUE already set, exporting and exiting. Set to: '${IRSA_PING_ANNOTATION_KEY_VALUE}'"
+    echo "IRSA_PING_ANNOTATION_KEY_VALUE already set"
     export IRSA_PING_ANNOTATION_KEY_VALUE="${IRSA_PING_ANNOTATION_KEY_VALUE}"
     return
   fi
-
-
-  echo "IRSA_PING_ANNOTATION_KEY_VALUE is not set, trying to find it in SSM..."
-  local ssm_path_prefix="$1"
-  local env="$2"
 
   # Default empty string
   IRSA_PING_ANNOTATION_KEY_VALUE=''
 
   if [ "${ssm_path_prefix}" != "unused" ]; then
+    echo "IRSA_PING_ANNOTATION_KEY_VALUE is not set, trying to find it in SSM..."
 
-    # Getting value from ssm parameter store.
+    # Try to get value from SSM, if it can't be found, allow script to continue
+    # in the case that it is an intentionally empty environment for future use
     if ! ssm_value=$(get_ssm_value "${ssm_path_prefix}/${env}"); then
-      echo "Error: ${ssm_value}"
-      exit 1
+      echo "WARNING: There was a problem fetching SSM '${ssm_path_prefix}', continuing as this could be an empty environment"
+    else
+      # IRSA for ping product pods. The role name is predefined as a part of the interface contract.
+      echo "SSM found"
+      IRSA_PING_ANNOTATION_KEY_VALUE="eks.amazonaws.com/role-arn: arn:aws:iam::${ssm_value}:role/pcpt/irsa-roles/irsa-ping"
     fi
-
-    # IRSA for ping product pods. The role name is predefined as a part of the interface contract.
-    IRSA_PING_ANNOTATION_KEY_VALUE="eks.amazonaws.com/role-arn: arn:aws:iam::${ssm_value}:role/pcpt/irsa-roles/irsa-ping"
-
-    echo "IRSA set to: ${IRSA_PING_ANNOTATION_KEY_VALUE}"
   else
-    echo "SSM is set to 'unused', setting IRSA_PING_ANNOTATION_KEY_VALUE to '${IRSA_PING_ANNOTATION_KEY_VALUE}'"
+    echo "SSM is set to 'unused'"
   fi
 
+  echo "IRSA_PING_ANNOTATION_KEY_VALUE set to '${IRSA_PING_ANNOTATION_KEY_VALUE}'"
   export IRSA_PING_ANNOTATION_KEY_VALUE="${IRSA_PING_ANNOTATION_KEY_VALUE}"
 }
 
@@ -468,24 +467,32 @@ add_nlb_variables() {
   local env="$2"
 
   if test "${NLB_NGX_PUBLIC_ANNOTATION_KEY_VALUE}"; then
+    echo "NLB_NGX_PUBLIC_ANNOTATION_KEY_VALUE already set"
     export NLB_NGX_PUBLIC_ANNOTATION_KEY_VALUE="${NLB_NGX_PUBLIC_ANNOTATION_KEY_VALUE}"
-  else
-    # Default empty string
-    NLB_NGX_PUBLIC_ANNOTATION_KEY_VALUE=''
+    return
+  fi
 
-    if [ "${ssm_path_prefix}" != "unused" ]; then
+  # Default empty string
+  NLB_NGX_PUBLIC_ANNOTATION_KEY_VALUE=''
 
-      # Getting value from ssm parameter store.
-      if ! ssm_value=$(get_ssm_value "${ssm_path_prefix}/${env}/nginx-public"); then
-        echo "Error: ${ssm_value}"
-        exit 1
-      fi
+  if [ "${ssm_path_prefix}" != "unused" ]; then
+    echo "NLB_NGX_PUBLIC_ANNOTATION_KEY_VALUE is not set, trying to find it in SSM..."
 
+    # Try to get value from SSM, if it can't be found, allow script to continue
+    # in the case that it is an intentionally empty environment for future use
+    if ! ssm_value=$(get_ssm_value "${ssm_path_prefix}/${env}/nginx-public"); then
+      echo "WARNING: There was a problem fetching SSM '${ssm_path_prefix}', continuing as this could be an empty environment"
+    else
+      # IRSA for ping product pods. The role name is predefined as a part of the interface contract.
+      echo "SSM found"
       NLB_NGX_PUBLIC_ANNOTATION_KEY_VALUE="service.beta.kubernetes.io/aws-load-balancer-eip-allocations: ${ssm_value}"
     fi
-
-    export NLB_NGX_PUBLIC_ANNOTATION_KEY_VALUE="${NLB_NGX_PUBLIC_ANNOTATION_KEY_VALUE}"
+  else
+    echo "SSM is set to 'unused'"
   fi
+
+  echo "NLB_NGX_PUBLIC_ANNOTATION_KEY_VALUE set to '${NLB_NGX_PUBLIC_ANNOTATION_KEY_VALUE}'"
+  export NLB_NGX_PUBLIC_ANNOTATION_KEY_VALUE="${NLB_NGX_PUBLIC_ANNOTATION_KEY_VALUE}"
 }
 
 ########################################################################################################################
