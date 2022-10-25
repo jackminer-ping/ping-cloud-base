@@ -414,9 +414,25 @@ add_derived_variables() {
   export NEW_RELIC_ENVIRONMENT_NAME="\${TENANT_NAME}_\${ENV}_\${REGION_NICK_NAME}_k8s-cluster"
 }
 
+handle_input_var() {
+  local var_name="${1}"
+  local var_value="${!1}"
+  local ssm_path_prefix="${2}"
+  local ssm_value="${3}"
+  local env="${4}"
+
+  if test "${var_value}"; then
+    echo "${var_name} already set to '${var_value}'"
+    export "${var_name}=${var_value}"
+    return
+  fi
+
+
+}
+
 ########################################################################################################################
 # Export IRSA annotation for the provided environment.
-# TODO: this funtion should be deduplicated with all other set/get variable functions
+# TODO: this funtion should be deduplicated along with all other set/get variable functions
 #
 # Arguments
 #   ${1} -> The SSM path prefix which stores CDE account IDs of Ping Cloud environments.
@@ -438,17 +454,16 @@ add_irsa_variables() {
   if [ "${ssm_path_prefix}" != "unused" ]; then
     echo "IRSA_PING_ANNOTATION_KEY_VALUE is not set, trying to find it in SSM..."
 
-    # Try to get value from SSM, if it can't be found, allow script to continue
-    # in the case that it is an intentionally empty environment for future use
     if ! ssm_value=$(get_ssm_value "${ssm_path_prefix}/${env}"); then
-      echo "WARNING: There was a problem fetching SSM '${ssm_path_prefix}', continuing as this could be an empty environment"
+      echo "WARNING: Issue fetching SSM path '${ssm_path_prefix}/${env}' - ${ssm_value}"
+      echo "Continuing as this could be a disabled environment"
     else
       # IRSA for ping product pods. The role name is predefined as a part of the interface contract.
       echo "SSM found"
       IRSA_PING_ANNOTATION_KEY_VALUE="eks.amazonaws.com/role-arn: arn:aws:iam::${ssm_value}:role/pcpt/irsa-roles/irsa-ping"
     fi
   else
-    echo "SSM is set to 'unused'"
+    echo "Not fetching SSM - it is set to 'unused'"
   fi
 
   echo "IRSA_PING_ANNOTATION_KEY_VALUE set to '${IRSA_PING_ANNOTATION_KEY_VALUE}'"
@@ -457,6 +472,7 @@ add_irsa_variables() {
 
 ########################################################################################################################
 # Export NLB EIP annotation for the provided environment.
+# TODO: this funtion should be deduplicated along with all other set/get variable functions
 #
 # Arguments
 #   ${1} -> The SSM path prefix which stores CDE account IDs of Ping Cloud environments.
@@ -478,17 +494,16 @@ add_nlb_variables() {
   if [ "${ssm_path_prefix}" != "unused" ]; then
     echo "NLB_NGX_PUBLIC_ANNOTATION_KEY_VALUE is not set, trying to find it in SSM..."
 
-    # Try to get value from SSM, if it can't be found, allow script to continue
-    # in the case that it is an intentionally empty environment for future use
     if ! ssm_value=$(get_ssm_value "${ssm_path_prefix}/${env}/nginx-public"); then
-      echo "WARNING: There was a problem fetching SSM '${ssm_path_prefix}', continuing as this could be an empty environment"
+      echo "WARNING: Issue fetching SSM path '${ssm_path_prefix}/${env}/nginx-public' - ${ssm_value}"
+      echo "Continuing as this could be a disabled environment"
     else
       # IRSA for ping product pods. The role name is predefined as a part of the interface contract.
       echo "SSM found"
       NLB_NGX_PUBLIC_ANNOTATION_KEY_VALUE="service.beta.kubernetes.io/aws-load-balancer-eip-allocations: ${ssm_value}"
     fi
   else
-    echo "SSM is set to 'unused'"
+    echo "Not fetching SSM - it is set to 'unused'"
   fi
 
   echo "NLB_NGX_PUBLIC_ANNOTATION_KEY_VALUE set to '${NLB_NGX_PUBLIC_ANNOTATION_KEY_VALUE}'"
@@ -992,7 +1007,10 @@ for ENV_OR_BRANCH in ${ENVIRONMENTS}; do
   export CLUSTER_NAME_LC="${CLUSTER_NAME_LC}"
 
   add_derived_variables
-  add_irsa_variables "${ACCOUNT_ID_PATH_PREFIX:-unused}" "${ENV}"
+  #add_irsa_variables "${ACCOUNT_ID_PATH_PREFIX:-unused}" "${ENV}"
+  # VARIABLE SSM_PATH SSM_VALUE
+  handle_input_var "IRSA_PING_ANNOTATION_KEY_VALUE" "${ACCOUNT_ID_PATH_PREFIX:-unused}"
+  echo "set IRSA to: ${IRSA_PING_ANNOTATION_KEY_VALUE}"
   add_nlb_variables "${NLB_EIP_PATH_PREFIX:-unused}" "${ENV}"
 
   PGO_BACKUP_BUCKET_NAME=${PGO_BACKUP_BUCKET_NAME:-"${ACCOUNT_BASE_PATH}/${ENV}${PGO_BUCKET_URI_SUFFIX}"}
