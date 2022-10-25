@@ -427,7 +427,7 @@ add_irsa_variables() {
   local env="$2"
 
   if test "${IRSA_PING_ANNOTATION_KEY_VALUE}"; then
-    echo "IRSA_PING_ANNOTATION_KEY_VALUE already set"
+    echo "IRSA_PING_ANNOTATION_KEY_VALUE already set to '${IRSA_PING_ANNOTATION_KEY_VALUE}'"
     export IRSA_PING_ANNOTATION_KEY_VALUE="${IRSA_PING_ANNOTATION_KEY_VALUE}"
     return
   fi
@@ -467,7 +467,7 @@ add_nlb_variables() {
   local env="$2"
 
   if test "${NLB_NGX_PUBLIC_ANNOTATION_KEY_VALUE}"; then
-    echo "NLB_NGX_PUBLIC_ANNOTATION_KEY_VALUE already set"
+    echo "NLB_NGX_PUBLIC_ANNOTATION_KEY_VALUE already set to '${NLB_NGX_PUBLIC_ANNOTATION_KEY_VALUE}'"
     export NLB_NGX_PUBLIC_ANNOTATION_KEY_VALUE="${NLB_NGX_PUBLIC_ANNOTATION_KEY_VALUE}"
     return
   fi
