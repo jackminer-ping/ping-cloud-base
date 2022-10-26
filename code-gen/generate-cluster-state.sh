@@ -415,39 +415,6 @@ add_derived_variables() {
 }
 
 ########################################################################################################################
-# Set a given variable name based on an SSM prefix and suffix. If SSM exists, the ssm_template will
-# be used to set the value. If the SSM prefix is 'unused', no value is set and SSM isn't checked.
-########################################################################################################################
-set_optional_ssm() {
-  local var_name="${1}"
-  local var_value="${!1}"
-  local ssm_prefix="${2}"
-  local ssm_suffix="${3}"
-  local ssm_template="${4}"
-
-  if [[ ${var_value} != '' ]]; then
-    echo "${var_name} already set to '${var_value}'"
-    return
-  elif [[ ${ssm_prefix} != "unused" ]]; then
-    echo "${var_name} is not set, trying to find it in SSM..."
-    if ! ssm_value=$(get_ssm_value "${ssm_prefix}/${ssm_suffix}"); then
-      echo "WARN: Issue fetching SSM path '${ssm_prefix}/${ssm_suffix}' - ${ssm_value}...
-            Continuing as this could be a disabled environment"
-    else
-      echo "Found '${ssm_prefix}/${ssm_suffix}' in SSM"
-      # Substitue ssm_value within the supplied ssm template
-      var_value=$(echo "${ssm_template}" | ssm_value=${ssm_value} envsubst)
-    fi
-  else
-    echo "Not fetching SSM - it is set to 'unused'"
-  fi
-
-  # Always export the variable and value
-  echo "Setting '${var_name}' to '${var_value}'"
-  export "${var_name}=${var_value}"
-}
-
-########################################################################################################################
 # Export the IS_GA environment variable for the provided customer. If it's already present as a boolean environment
 # variable, then export it as is. Otherwise, if the SSM path prefix for it is not 'unused', then try to retrieve it out
 # of SSM. On error, print a warning message, but default the value to false. On success, use the value from SSM, if it
@@ -945,14 +912,14 @@ for ENV_OR_BRANCH in ${ENVIRONMENTS}; do
 
   add_derived_variables
 
+  export IRSA_PING_ANNOTATION_KEY_VALUE=${IRSA_PING_ANNOTATION_KEY_VALUE:-''}
+  # IRSA for ping product pods. The role name is predefined as a part of the interface contract.
   IRSA_TEMPLATE='eks.amazonaws.com/role-arn: arn:aws:iam::${ssm_value}:role/pcpt/irsa-roles/irsa-ping'
+  set_templated_var "IRSA_PING_ANNOTATION_KEY_VALUE" "${ACCOUNT_ID_PATH_PREFIX:-unused}" "${ENV}" "${IRSA_TEMPLATE}"
+
+  export NLB_NGX_PUBLIC_ANNOTATION_KEY_VALUE=${NLB_NGX_PUBLIC_ANNOTATION_KEY_VALUE:-''}
   NLB_TEMPLATE='service.beta.kubernetes.io/aws-load-balancer-eip-allocations: ${ssm_value}'
-
-  export IRSA_PING_ANNOTATION_KEY_VALUE=${IRSA_PING_ANNOTATION_KEY_VALUE:''}
-  set_optional_ssm "IRSA_PING_ANNOTATION_KEY_VALUE" "${ACCOUNT_ID_PATH_PREFIX:-unused}" "${ENV}" "${IRSA_TEMPLATE}"
-
-  export NLB_NGX_PUBLIC_ANNOTATION_KEY_VALUE=${NLB_NGX_PUBLIC_ANNOTATION_KEY_VALUE:''}
-  set_optional_ssm "NLB_NGX_PUBLIC_ANNOTATION_KEY_VALUE" "${NLB_EIP_PATH_PREFIX:-unused}" "${ENV}/nginx-public" \
+  set_templated_var "NLB_NGX_PUBLIC_ANNOTATION_KEY_VALUE" "${NLB_EIP_PATH_PREFIX:-unused}" "${ENV}/nginx-public" \
                    "${NLB_TEMPLATE}"
 
   PGO_BACKUP_BUCKET_NAME=${PGO_BACKUP_BUCKET_NAME:-"${ACCOUNT_BASE_PATH}/${ENV}${PGO_BUCKET_URI_SUFFIX}"}
