@@ -414,100 +414,37 @@ add_derived_variables() {
   export NEW_RELIC_ENVIRONMENT_NAME="\${TENANT_NAME}_\${ENV}_\${REGION_NICK_NAME}_k8s-cluster"
 }
 
-handle_input_var() {
+########################################################################################################################
+# Set a given variable name based on an SSM prefix and suffix. If SSM exists, the ssm_template will
+# be used to set the value. If the SSM prefix is 'unused', no value is set and SSM isn't checked.
+########################################################################################################################
+set_optional_ssm() {
   local var_name="${1}"
   local var_value="${!1}"
-  local ssm_path_prefix="${2}"
-  local ssm_value="${3}"
-  local env="${4}"
+  local ssm_prefix="${2}"
+  local ssm_suffix="${3}"
+  local ssm_template="${4}"
 
-  if test "${var_value}"; then
+  if [[ ${var_value} != '' ]]; then
     echo "${var_name} already set to '${var_value}'"
-    export "${var_name}=${var_value}"
     return
-  fi
-
-
-}
-
-########################################################################################################################
-# Export IRSA annotation for the provided environment.
-# TODO: this funtion should be deduplicated along with all other set/get variable functions
-#
-# Arguments
-#   ${1} -> The SSM path prefix which stores CDE account IDs of Ping Cloud environments.
-#   ${2} -> The environment name.
-########################################################################################################################
-add_irsa_variables() {
-  local ssm_path_prefix="$1"
-  local env="$2"
-
-  if test "${IRSA_PING_ANNOTATION_KEY_VALUE}"; then
-    echo "IRSA_PING_ANNOTATION_KEY_VALUE already set to '${IRSA_PING_ANNOTATION_KEY_VALUE}'"
-    export IRSA_PING_ANNOTATION_KEY_VALUE="${IRSA_PING_ANNOTATION_KEY_VALUE}"
-    return
-  fi
-
-  # Default empty string
-  IRSA_PING_ANNOTATION_KEY_VALUE=''
-
-  if [ "${ssm_path_prefix}" != "unused" ]; then
-    echo "IRSA_PING_ANNOTATION_KEY_VALUE is not set, trying to find it in SSM..."
-
-    if ! ssm_value=$(get_ssm_value "${ssm_path_prefix}/${env}"); then
-      echo "WARNING: Issue fetching SSM path '${ssm_path_prefix}/${env}' - ${ssm_value}"
-      echo "Continuing as this could be a disabled environment"
+  elif [[ ${ssm_prefix} != "unused" ]]; then
+    echo "${var_name} is not set, trying to find it in SSM..."
+    if ! ssm_value=$(get_ssm_value "${ssm_prefix}/${ssm_suffix}"); then
+      echo "WARN: Issue fetching SSM path '${ssm_prefix}/${ssm_suffix}' - ${ssm_value}...
+            Continuing as this could be a disabled environment"
     else
-      # IRSA for ping product pods. The role name is predefined as a part of the interface contract.
-      echo "SSM found"
-      IRSA_PING_ANNOTATION_KEY_VALUE="eks.amazonaws.com/role-arn: arn:aws:iam::${ssm_value}:role/pcpt/irsa-roles/irsa-ping"
+      echo "Found '${ssm_prefix}/${ssm_suffix}' in SSM"
+      # Substitue ssm_value within the supplied ssm template
+      var_value=$(echo "${ssm_template}" | ssm_value=${ssm_value} envsubst)
     fi
   else
     echo "Not fetching SSM - it is set to 'unused'"
   fi
 
-  echo "IRSA_PING_ANNOTATION_KEY_VALUE set to '${IRSA_PING_ANNOTATION_KEY_VALUE}'"
-  export IRSA_PING_ANNOTATION_KEY_VALUE="${IRSA_PING_ANNOTATION_KEY_VALUE}"
-}
-
-########################################################################################################################
-# Export NLB EIP annotation for the provided environment.
-# TODO: this funtion should be deduplicated along with all other set/get variable functions
-#
-# Arguments
-#   ${1} -> The SSM path prefix which stores CDE account IDs of Ping Cloud environments.
-#   ${2} -> The environment name.
-########################################################################################################################
-add_nlb_variables() {
-  local ssm_path_prefix="$1"
-  local env="$2"
-
-  if test "${NLB_NGX_PUBLIC_ANNOTATION_KEY_VALUE}"; then
-    echo "NLB_NGX_PUBLIC_ANNOTATION_KEY_VALUE already set to '${NLB_NGX_PUBLIC_ANNOTATION_KEY_VALUE}'"
-    export NLB_NGX_PUBLIC_ANNOTATION_KEY_VALUE="${NLB_NGX_PUBLIC_ANNOTATION_KEY_VALUE}"
-    return
-  fi
-
-  # Default empty string
-  NLB_NGX_PUBLIC_ANNOTATION_KEY_VALUE=''
-
-  if [ "${ssm_path_prefix}" != "unused" ]; then
-    echo "NLB_NGX_PUBLIC_ANNOTATION_KEY_VALUE is not set, trying to find it in SSM..."
-
-    if ! ssm_value=$(get_ssm_value "${ssm_path_prefix}/${env}/nginx-public"); then
-      echo "WARNING: Issue fetching SSM path '${ssm_path_prefix}/${env}/nginx-public' - ${ssm_value}"
-      echo "Continuing as this could be a disabled environment"
-    else
-      # IRSA for ping product pods. The role name is predefined as a part of the interface contract.
-      echo "SSM found"
-      NLB_NGX_PUBLIC_ANNOTATION_KEY_VALUE="service.beta.kubernetes.io/aws-load-balancer-eip-allocations: ${ssm_value}"
-    fi
-  else
-    echo "Not fetching SSM - it is set to 'unused'"
-  fi
-
-  echo "NLB_NGX_PUBLIC_ANNOTATION_KEY_VALUE set to '${NLB_NGX_PUBLIC_ANNOTATION_KEY_VALUE}'"
-  export NLB_NGX_PUBLIC_ANNOTATION_KEY_VALUE="${NLB_NGX_PUBLIC_ANNOTATION_KEY_VALUE}"
+  # Always export the variable and value
+  echo "Setting '${var_name}' to '${var_value}'"
+  export "${var_name}=${var_value}"
 }
 
 ########################################################################################################################
@@ -804,13 +741,13 @@ CDE_TEMPLATES_DIR="${TEMPLATES_HOME}/cde"
 
 #Adding an ArgoCD notification slack token
 ARGOCD_SLACK_TOKEN_SSM_PATH="${ARGOCD_SLACK_TOKEN_SSM_PATH:-ssm://pcpt/argocd/notification/slack/access_token}"
-  if ! ssm_value=$(get_ssm_value "${ARGOCD_SLACK_TOKEN_SSM_PATH#ssm:/}"); then
-    echo "Warn: ${ssm_value}"
-    echo "ARGOCD_SLACK_TOKEN is unset, slack notification and argo-events will not work"
-    echo "Using default invalid token"
-    ARGOCD_SLACK_TOKEN="using_default_invalid_token"
-  else
-    ARGOCD_SLACK_TOKEN="${ssm_value}"
+if ! ssm_value=$(get_ssm_value "${ARGOCD_SLACK_TOKEN_SSM_PATH#ssm:/}"); then
+  echo "Warn: ${ssm_value}"
+  echo "ARGOCD_SLACK_TOKEN is unset, slack notification and argo-events will not work"
+  echo "Using default invalid token"
+  ARGOCD_SLACK_TOKEN="using_default_invalid_token"
+else
+  ARGOCD_SLACK_TOKEN="${ssm_value}"
 fi
 
 export ARGOCD_SLACK_TOKEN_BASE64=$(base64_no_newlines "${ARGOCD_SLACK_TOKEN}")
@@ -1007,11 +944,16 @@ for ENV_OR_BRANCH in ${ENVIRONMENTS}; do
   export CLUSTER_NAME_LC="${CLUSTER_NAME_LC}"
 
   add_derived_variables
-  #add_irsa_variables "${ACCOUNT_ID_PATH_PREFIX:-unused}" "${ENV}"
-  # VARIABLE SSM_PATH SSM_VALUE
-  handle_input_var "IRSA_PING_ANNOTATION_KEY_VALUE" "${ACCOUNT_ID_PATH_PREFIX:-unused}"
-  echo "set IRSA to: ${IRSA_PING_ANNOTATION_KEY_VALUE}"
-  add_nlb_variables "${NLB_EIP_PATH_PREFIX:-unused}" "${ENV}"
+
+  IRSA_TEMPLATE='eks.amazonaws.com/role-arn: arn:aws:iam::${ssm_value}:role/pcpt/irsa-roles/irsa-ping'
+  NLB_TEMPLATE='service.beta.kubernetes.io/aws-load-balancer-eip-allocations: ${ssm_value}'
+
+  export IRSA_PING_ANNOTATION_KEY_VALUE=${IRSA_PING_ANNOTATION_KEY_VALUE:''}
+  set_optional_ssm "IRSA_PING_ANNOTATION_KEY_VALUE" "${ACCOUNT_ID_PATH_PREFIX:-unused}" "${ENV}" "${IRSA_TEMPLATE}"
+
+  export NLB_NGX_PUBLIC_ANNOTATION_KEY_VALUE=${NLB_NGX_PUBLIC_ANNOTATION_KEY_VALUE:''}
+  set_optional_ssm "NLB_NGX_PUBLIC_ANNOTATION_KEY_VALUE" "${NLB_EIP_PATH_PREFIX:-unused}" "${ENV}/nginx-public" \
+                   "${NLB_TEMPLATE}"
 
   PGO_BACKUP_BUCKET_NAME=${PGO_BACKUP_BUCKET_NAME:-"${ACCOUNT_BASE_PATH}/${ENV}${PGO_BUCKET_URI_SUFFIX}"}
   export PGO_BACKUP_BUCKET_NAME=$(get_pgo_backup_bucket_name "${PGO_BACKUP_BUCKET_NAME}")
