@@ -820,6 +820,8 @@ for ENV_OR_BRANCH in ${ENVIRONMENTS}; do
   export ENV="${ENV}"
   export ENVIRONMENT_TYPE="\${ENV}"
 
+  echo "-----> Starting to create environment '${ENV}'"
+
   # The base URL for kustomization files and environment will be different for each CDE.
   # On migrated customers, we must preserve the size of the customers.
   case "${ENV}" in
@@ -914,10 +916,12 @@ for ENV_OR_BRANCH in ${ENVIRONMENTS}; do
 
   export IRSA_PING_ANNOTATION_KEY_VALUE=${IRSA_PING_ANNOTATION_KEY_VALUE:-''}
   # IRSA for ping product pods. The role name is predefined as a part of the interface contract.
+  # shellcheck disable=SC2016
   IRSA_TEMPLATE='eks.amazonaws.com/role-arn: arn:aws:iam::${ssm_value}:role/pcpt/irsa-roles/irsa-ping'
   set_templated_var "IRSA_PING_ANNOTATION_KEY_VALUE" "${ACCOUNT_ID_PATH_PREFIX:-unused}" "${ENV}" "${IRSA_TEMPLATE}"
 
   export NLB_NGX_PUBLIC_ANNOTATION_KEY_VALUE=${NLB_NGX_PUBLIC_ANNOTATION_KEY_VALUE:-''}
+  # shellcheck disable=SC2016
   NLB_TEMPLATE='service.beta.kubernetes.io/aws-load-balancer-eip-allocations: ${ssm_value}'
   set_templated_var "NLB_NGX_PUBLIC_ANNOTATION_KEY_VALUE" "${NLB_EIP_PATH_PREFIX:-unused}" "${ENV}/nginx-public" \
                    "${NLB_TEMPLATE}"
@@ -1004,6 +1008,8 @@ for ENV_OR_BRANCH in ${ENVIRONMENTS}; do
     # Remove the pingcentral profiles
     rm -rf "${ENV_PROFILES_DIR}/${PING_CENTRAL}"
   fi
+
+  echo "=====> Done creating environment '${ENV}'"
 )
 done
 
