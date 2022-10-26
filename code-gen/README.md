@@ -29,3 +29,4 @@ We can test it by doing the following:
 ```
 ENVIRONMENTS='test' IS_PRIMARY=true IS_PROFILE_REPO=false GENERATED_CODE_DIR=/tmp/sandbox DISABLE_GIT=true /tmp/sandbox/push-cluster-state.sh
 ```
+Adjust the options as required to test (especially ENVIRONMENTS). Note DISABLE_GIT - this is an important one - it enables creation of a CSR/profile repo without git. This also means that only one ENVIRONMENT is supported at a time.
