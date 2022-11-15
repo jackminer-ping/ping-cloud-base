@@ -190,6 +190,10 @@ if test -f 'env_vars'; then
       log "git-ops-command: cloning git branch '${K8S_GIT_BRANCH}' from: ${K8S_GIT_URL}"
       git clone -c advice.detachedHead=false -q --depth=1 -b "${K8S_GIT_BRANCH}" --single-branch "${K8S_GIT_URL}" "${PCB_LOCAL}"
     else
+      if [[ -z ${PCB_PATH} ]]; then
+        log "git-ops-command: running in local mode, please provide a PCB_PATH. Exiting."
+        exit 1
+      fi
       log "git-ops-command: using PCB set by PCB_PATH: ${PCB_PATH}"
       PCB_LOCAL="${PCB_PATH}"
     fi
