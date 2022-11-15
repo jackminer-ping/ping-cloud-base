@@ -14,7 +14,11 @@ LOG_FILE=/tmp/git-ops-command.log
 ########################################################################################################################
 log() {
   msg="$1"
-  echo "${msg}" >> "${LOG_FILE}"
+  if [[ "${DEBUG}" == "true" ]]; then
+    echo "${msg}"
+  else
+    echo "${msg}" >> "${LOG_FILE}"
+  fi
 }
 
 ########################################################################################################################
@@ -134,8 +138,10 @@ cleanup() {
 TARGET_DIR="${1:-.}"
 cd "${TARGET_DIR}" >/dev/null 2>&1
 
-# Trap all exit codes from here on so cleanup is run
-trap "cleanup" EXIT
+if [[ "${DEBUG}" != "true" ]]; then
+  # Trap all exit codes from here on so cleanup is run
+  trap "cleanup" EXIT
+fi
 
 # Get short and full directory names of the target directory
 TARGET_DIR_FULL="$(pwd)"
@@ -171,15 +177,22 @@ if test -f 'env_vars'; then
 
     substitute_vars "${env_vars_file}" .
 
-    # Clone git branch from the upstream repo
-    log "git-ops-command: cloning git branch '${K8S_GIT_BRANCH}' from: ${K8S_GIT_URL}"
-    git clone -c advice.detachedHead=false -q --depth=1 -b "${K8S_GIT_BRANCH}" --single-branch "${K8S_GIT_URL}" "${TMP_DIR}/${K8S_GIT_BRANCH}"
+    PCB_LOCAL="${TMP_DIR}/${K8S_GIT_BRANCH}"
 
-    log "git-ops-command: replacing remote repo URL '${K8S_GIT_URL}' with locally cloned repo"
+    if [[ -z "${LOCAL}" ]]; then
+      # Clone git branch from the upstream repo
+      log "git-ops-command: cloning git branch '${K8S_GIT_BRANCH}' from: ${K8S_GIT_URL}"
+      git clone -c advice.detachedHead=false -q --depth=1 -b "${K8S_GIT_BRANCH}" --single-branch "${K8S_GIT_URL}" "${PCB_LOCAL}"
+    else
+      log "git-ops-command: using PCB set by PCB_PATH: ${PCB_PATH}"
+      PCB_LOCAL="${PCB_PATH}"
+    fi
+
+    log "git-ops-command: replacing remote repo URL '${K8S_GIT_URL}' with locally cloned repo at ${PCB_PATH}"
     kust_files="$(find "${TMP_DIR}" -name kustomization.yaml | grep -wv "${K8S_GIT_BRANCH}")"
 
     for kust_file in ${kust_files}; do
-      rel_resource_dir="$(relative_path "$(dirname "${kust_file}")" "${TMP_DIR}/${K8S_GIT_BRANCH}")"
+      rel_resource_dir="$(relative_path "$(dirname "${kust_file}")" "${PCB_LOCAL}")"
       log "git-ops-command: replacing ${K8S_GIT_URL} in file ${kust_file} with ${rel_resource_dir}"
       sed -i.bak \
           -e "s|${K8S_GIT_URL}|${rel_resource_dir}|g" \
@@ -211,9 +224,14 @@ else
 fi
 
 # Build the uber deploy yaml
-if test -z "${OUT_DIR}" || test ! -d "${OUT_DIR}"; then
+if [[ ${DEBUG} == "true" ]]; then
+  log "git-ops-command: DEBUG - generating uber yaml file from '${BUILD_DIR}' to /tmp/uber-debug.yaml"
+  kustomize build ${build_load_arg} ${build_load_arg_value} "${BUILD_DIR}" --output /tmp/uber-debug.yaml
+elif test -z "${OUT_DIR}" || test ! -d "${OUT_DIR}"; then
   log "git-ops-command: generating uber yaml file from '${BUILD_DIR}' to stdout"
   kustomize build ${build_load_arg} ${build_load_arg_value} "${BUILD_DIR}"
+# TODO: leave this functionality for now - it outputs many yaml files to the OUT_DIR
+# it isn't clear if this is still used in actual CDEs
 else
   log "git-ops-command: generating yaml files from '${BUILD_DIR}' to '${OUT_DIR}'"
   kustomize build ${build_load_arg} ${build_load_arg_value} "${BUILD_DIR}" --output "${OUT_DIR}"
