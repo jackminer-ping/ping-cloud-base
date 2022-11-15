@@ -183,18 +183,18 @@ if test -f 'env_vars'; then
 
     PCB_LOCAL="${TMP_DIR}/${K8S_GIT_BRANCH}"
 
-    if [[ -z "${LOCAL}" ]]; then
-      # Clone git branch from the upstream repo
-      log "cloning git branch '${K8S_GIT_BRANCH}' from: ${K8S_GIT_URL}"
-      git clone -c advice.detachedHead=false -q --depth=1 -b "${K8S_GIT_BRANCH}" --single-branch "${K8S_GIT_URL}" "${PCB_LOCAL}"
-    else
-      if [[ -z ${PCB_PATH} ]]; then
-        log "running in local mode, please provide a PCB_PATH. Exiting."
+    # Try to copy a local repo to improve testing flow
+    if [[ "${LOCAL}" == "true" ]]; then
+      if [[ -z "${PCB_PATH}" ]]; then
+        log "ERROR: running in local mode, please provide a PCB_PATH. Exiting."
         exit 1
       fi
       log "using PCB set by PCB_PATH: ${PCB_PATH}"
-      # Copy the local PCB into a temporary dir for changes
       cp -pr "${PCB_PATH}" "${TMP_DIR}/${K8S_GIT_BRANCH}"
+    # Clone git branch from the upstream repo
+    else
+      log "cloning git branch '${K8S_GIT_BRANCH}' from: ${K8S_GIT_URL}"
+      git clone -c advice.detachedHead=false -q --depth=1 -b "${K8S_GIT_BRANCH}" --single-branch "${K8S_GIT_URL}" "${PCB_LOCAL}"
     fi
 
     log "replacing remote repo URL '${K8S_GIT_URL}' with locally cloned repo at ${PCB_LOCAL}"
@@ -236,6 +236,7 @@ fi
 if [[ ${DEBUG} == "true" ]]; then
   log "DEBUG - generating uber yaml file from '${BUILD_DIR}' to /tmp/uber-debug.yaml"
   kustomize build ${build_load_arg} ${build_load_arg_value} "${BUILD_DIR}" --output /tmp/uber-debug.yaml
+# Output the yaml to stdout for Argo when operating normally
 elif test -z "${OUT_DIR}" || test ! -d "${OUT_DIR}"; then
   log "generating uber yaml file from '${BUILD_DIR}' to stdout"
   kustomize build ${build_load_arg} ${build_load_arg_value} "${BUILD_DIR}"
