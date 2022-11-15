@@ -151,7 +151,11 @@ TARGET_DIR_SHORT="$(basename "${TARGET_DIR_FULL}")"
 BASE_DIR='../base'
 
 # Perform substitution and build in a temporary directory
-TMP_DIR="$(mktemp -d)"
+if [[ ${DEBUG} == "true" ]]; then
+  TMP_DIR="/tmp/git-ops-scratch-space"
+else
+  TMP_DIR="$(mktemp -d)"
+fi
 BUILD_DIR="${TMP_DIR}/${TARGET_DIR_SHORT}"
 
 # Copy contents of target directory into temporary directory
