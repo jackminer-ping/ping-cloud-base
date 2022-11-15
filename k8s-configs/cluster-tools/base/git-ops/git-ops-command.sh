@@ -17,9 +17,9 @@ LOG_FILE=/tmp/git-ops-command.log
 log() {
   msg="$1"
   if [[ "${DEBUG}" == "true" ]]; then
-    echo "${msg}"
+    echo "git-ops-command: ${msg}"
   else
-    echo "${msg}" >> "${LOG_FILE}"
+    echo "git-ops-command: ${msg}" >> "${LOG_FILE}"
   fi
 }
 
@@ -34,11 +34,11 @@ substitute_vars() {
   env_file="$1"
   subst_dir="$2"
 
-  log "git-ops-command: substituting variables in '${env_file}' in directory ${subst_dir}"
+  log "substituting variables in '${env_file}' in directory ${subst_dir}"
 
   # Create a list of variables to substitute
   vars="$(grep -Ev "^$|#" "${env_file}" | cut -d= -f1 | awk '{ print "${" $1 "}" }')"
-  log "git-ops-command: substituting variables '${vars}'"
+  log "substituting variables '${vars}'"
 
   # Export the environment variables
   set -a; . "${env_file}"; set +a
@@ -89,12 +89,12 @@ feature_flags() {
   for flag in $flag_map ; do
     enabled="${flag%%:*}"
     search_term="${flag##*:}"
-    log "git-ops-command: ${search_term} is set to ${enabled}"
+    log "${search_term} is set to ${enabled}"
 
     # If the feature flag is disabled, comment the search term lines out of the kustomization files
     if [[ ${enabled} != "true" ]]; then
       for kust_file in $(git grep -l "${search_term}" | grep "kustomization.yaml"); do
-        log "git-ops-command: Commenting out ${search_term} in ${kust_file}"
+        log "Commenting out ${search_term} in ${kust_file}"
         sed -i.bak \
             -e "/${search_term}/ s|^#*|#|g" \
             "${kust_file}"
@@ -161,14 +161,14 @@ fi
 BUILD_DIR="${TMP_DIR}/${TARGET_DIR_SHORT}"
 
 # Copy contents of target directory into temporary directory
-log "git-ops-command: copying templates into '${TMP_DIR}'"
+log "copying templates into '${TMP_DIR}'"
 cp -pr "${TARGET_DIR_FULL}" "${TMP_DIR}"
 test -d "${BASE_DIR}" && cp -pr "${BASE_DIR}" "${TMP_DIR}"
 
 # If there's an environment file, then perform substitution
 if test -f 'env_vars'; then
   # Perform the substitutions in a sub-shell so it doesn't pollute the current shell.
-  log "git-ops-command: substituting env_vars into templates"
+  log "substituting env_vars into templates"
   (
     cd "${BUILD_DIR}"
 
@@ -187,23 +187,23 @@ if test -f 'env_vars'; then
 
     if [[ -z "${LOCAL}" ]]; then
       # Clone git branch from the upstream repo
-      log "git-ops-command: cloning git branch '${K8S_GIT_BRANCH}' from: ${K8S_GIT_URL}"
+      log "cloning git branch '${K8S_GIT_BRANCH}' from: ${K8S_GIT_URL}"
       git clone -c advice.detachedHead=false -q --depth=1 -b "${K8S_GIT_BRANCH}" --single-branch "${K8S_GIT_URL}" "${PCB_LOCAL}"
     else
       if [[ -z ${PCB_PATH} ]]; then
-        log "git-ops-command: running in local mode, please provide a PCB_PATH. Exiting."
+        log "running in local mode, please provide a PCB_PATH. Exiting."
         exit 1
       fi
-      log "git-ops-command: using PCB set by PCB_PATH: ${PCB_PATH}"
-      PCB_LOCAL="${PCB_PATH}"
+      log "using PCB set by PCB_PATH: ${PCB_PATH}"
+      PCB_LOCAL="${PCB_PATH}/${K8S_GIT_BRANCH}"
     fi
 
-    log "git-ops-command: replacing remote repo URL '${K8S_GIT_URL}' with locally cloned repo at ${PCB_PATH}"
+    log "replacing remote repo URL '${K8S_GIT_URL}' with locally cloned repo at ${PCB_PATH}"
     kust_files="$(find "${TMP_DIR}" -name kustomization.yaml | grep -wv "${K8S_GIT_BRANCH}")"
 
     for kust_file in ${kust_files}; do
       rel_resource_dir="$(relative_path "$(dirname "${kust_file}")" "${PCB_LOCAL}")"
-      log "git-ops-command: replacing ${K8S_GIT_URL} in file ${kust_file} with ${rel_resource_dir}"
+      log "replacing ${K8S_GIT_URL} in file ${kust_file} with ${rel_resource_dir}"
       sed -i.bak \
           -e "s|${K8S_GIT_URL}|${rel_resource_dir}|g" \
           -e "s|\?ref=${K8S_GIT_BRANCH}$||g" \
@@ -217,7 +217,7 @@ if test -f 'env_vars'; then
 fi
 
 KUST_VER="$(kustomize_version)"
-log "git-ops-command: detected kustomize version ${KUST_VER}"
+log "detected kustomize version ${KUST_VER}"
 
 # The load restriction build arg name and value are different starting in kustomize v4.0.1. This argument allows
 # kustomize to load patch files that are not directly under the kustomize root. For example, we need this option for
@@ -235,15 +235,15 @@ fi
 
 # Build the uber deploy yaml
 if [[ ${DEBUG} == "true" ]]; then
-  log "git-ops-command: DEBUG - generating uber yaml file from '${BUILD_DIR}' to /tmp/uber-debug.yaml"
+  log "DEBUG - generating uber yaml file from '${BUILD_DIR}' to /tmp/uber-debug.yaml"
   kustomize build ${build_load_arg} ${build_load_arg_value} "${BUILD_DIR}" --output /tmp/uber-debug.yaml
 elif test -z "${OUT_DIR}" || test ! -d "${OUT_DIR}"; then
-  log "git-ops-command: generating uber yaml file from '${BUILD_DIR}' to stdout"
+  log "generating uber yaml file from '${BUILD_DIR}' to stdout"
   kustomize build ${build_load_arg} ${build_load_arg_value} "${BUILD_DIR}"
 # TODO: leave this functionality for now - it outputs many yaml files to the OUT_DIR
 # it isn't clear if this is still used in actual CDEs
 else
-  log "git-ops-command: generating yaml files from '${BUILD_DIR}' to '${OUT_DIR}'"
+  log "generating yaml files from '${BUILD_DIR}' to '${OUT_DIR}'"
   kustomize build ${build_load_arg} ${build_load_arg_value} "${BUILD_DIR}" --output "${OUT_DIR}"
 fi
 
