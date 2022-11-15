@@ -1,7 +1,5 @@
 #!/bin/bash -e
 
-test "${DEBUG}" = "true" && set -x
-
 # This script copies the kustomization templates into a temporary directory, performs substitution into them using
 # environment variables defined in an env_vars file and builds the uber deploy.yaml file. It is run by the CD tool on
 # every poll interval.
@@ -195,10 +193,11 @@ if test -f 'env_vars'; then
         exit 1
       fi
       log "using PCB set by PCB_PATH: ${PCB_PATH}"
-      PCB_LOCAL="${PCB_PATH}/${K8S_GIT_BRANCH}"
+      # Copy the local PCB into a temporary dir for changes
+      cp -pr "${PCB_PATH}" "${TMP_DIR}/${K8S_GIT_BRANCH}"
     fi
 
-    log "replacing remote repo URL '${K8S_GIT_URL}' with locally cloned repo at ${PCB_PATH}"
+    log "replacing remote repo URL '${K8S_GIT_URL}' with locally cloned repo at ${PCB_LOCAL}"
     kust_files="$(find "${TMP_DIR}" -name kustomization.yaml | grep -wv "${K8S_GIT_BRANCH}")"
 
     for kust_file in ${kust_files}; do
