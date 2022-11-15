@@ -4,6 +4,8 @@
 # environment variables defined in an env_vars file and builds the uber deploy.yaml file. It is run by the CD tool on
 # every poll interval.
 
+# Developing this script? Check out https://confluence.pingidentity.com/x/2StOCw
+
 LOG_FILE=/tmp/git-ops-command.log
 
 ########################################################################################################################
@@ -153,15 +155,22 @@ BASE_DIR='../base'
 # Perform substitution and build in a temporary directory
 if [[ ${DEBUG} == "true" ]]; then
   TMP_DIR="/tmp/git-ops-scratch-space"
+  rm -rf "${TMP_DIR}"
+  mkdir -p "${TMP_DIR}"
 else
   TMP_DIR="$(mktemp -d)"
 fi
 BUILD_DIR="${TMP_DIR}/${TARGET_DIR_SHORT}"
 
 # Copy contents of target directory into temporary directory
-log "copying templates into '${TMP_DIR}'"
+log "copying '${TARGET_DIR_FULL}' templates into '${TMP_DIR}'"
 cp -pr "${TARGET_DIR_FULL}" "${TMP_DIR}"
-test -d "${BASE_DIR}" && cp -pr "${BASE_DIR}" "${TMP_DIR}"
+log "copying '${BASE_DIR}' templates into '${TMP_DIR}', if ${BASE_DIR} exists"
+
+if test -d "${BASE_DIR}"; then
+  log "copying '${BASE_DIR}' templates into '${TMP_DIR}'" && \
+  cp -pr "${BASE_DIR}" "${TMP_DIR}"
+fi
 
 # If there's an environment file, then perform substitution
 if test -f 'env_vars'; then
