@@ -1,5 +1,7 @@
 #!/bin/bash -e
 
+test "${DEBUG}" = "true" && set -x
+
 # This script copies the kustomization templates into a temporary directory, performs substitution into them using
 # environment variables defined in an env_vars file and builds the uber deploy.yaml file. It is run by the CD tool on
 # every poll interval.
