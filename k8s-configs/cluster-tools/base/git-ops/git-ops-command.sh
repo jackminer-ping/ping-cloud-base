@@ -165,7 +165,6 @@ BUILD_DIR="${TMP_DIR}/${TARGET_DIR_SHORT}"
 # Copy contents of target directory into temporary directory
 log "copying '${TARGET_DIR_FULL}' templates into '${TMP_DIR}'"
 cp -pr "${TARGET_DIR_FULL}" "${TMP_DIR}"
-log "copying '${BASE_DIR}' templates into '${TMP_DIR}', if ${BASE_DIR} exists"
 
 if test -d "${BASE_DIR}"; then
   log "copying '${BASE_DIR}' templates into '${TMP_DIR}'" && \
@@ -190,7 +189,7 @@ if test -f 'env_vars'; then
 
     substitute_vars "${env_vars_file}" .
 
-    PCB_LOCAL="${TMP_DIR}/${K8S_GIT_BRANCH}"
+    PCB_TMP="${TMP_DIR}/${K8S_GIT_BRANCH}"
 
     # Try to copy a local repo to improve testing flow
     if [[ "${LOCAL}" == "true" ]]; then
@@ -199,18 +198,18 @@ if test -f 'env_vars'; then
         exit 1
       fi
       log "using PCB set by PCB_PATH: ${PCB_PATH}"
-      cp -pr "${PCB_PATH}" "${TMP_DIR}/${K8S_GIT_BRANCH}"
+      cp -pr "${PCB_PATH}" "${PCB_TMP}"
     # Clone git branch from the upstream repo
     else
       log "cloning git branch '${K8S_GIT_BRANCH}' from: ${K8S_GIT_URL}"
-      git clone -c advice.detachedHead=false -q --depth=1 -b "${K8S_GIT_BRANCH}" --single-branch "${K8S_GIT_URL}" "${PCB_LOCAL}"
+      git clone -c advice.detachedHead=false -q --depth=1 -b "${K8S_GIT_BRANCH}" --single-branch "${K8S_GIT_URL}" "${PCB_TMP}"
     fi
 
-    log "replacing remote repo URL '${K8S_GIT_URL}' with locally cloned repo at ${PCB_LOCAL}"
+    log "replacing remote repo URL '${K8S_GIT_URL}' with locally cloned repo at ${PCB_TMP}"
     kust_files="$(find "${TMP_DIR}" -name kustomization.yaml | grep -wv "${K8S_GIT_BRANCH}")"
 
     for kust_file in ${kust_files}; do
-      rel_resource_dir="$(relative_path "$(dirname "${kust_file}")" "${PCB_LOCAL}")"
+      rel_resource_dir="$(relative_path "$(dirname "${kust_file}")" "${PCB_TMP}")"
       log "replacing ${K8S_GIT_URL} in file ${kust_file} with ${rel_resource_dir}"
       sed -i.bak \
           -e "s|${K8S_GIT_URL}|${rel_resource_dir}|g" \
