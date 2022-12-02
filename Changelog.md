@@ -17,6 +17,7 @@
 _Changes:_
 
 - [X] PDO-2799 Rewrite CloudWatch log tests
+- [X] PDO-4224 Properly propagate SSH key when upgrading CSR
 - [X] PDO-4240 PF Health Check Tests - Certificates
 - [X] PDO-4312 PA-WAS Health Check Tests - object creation, unauthenticated proxy requests
 - [X] PDO-4432 Logstash has broken tolerations
