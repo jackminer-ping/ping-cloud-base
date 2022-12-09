@@ -592,8 +592,8 @@ print_readme() {
   echo "      showing how to patch HPA settings, replica count, mem/cpu request/limits, etc."
   echo
 
-  if "${ID_RSA_VALUE}"; then
-    echo "- The SSH key has been successfully move to the '${NEW_VERSION}'."
+  if test -n "${ID_RSA_VALUE}"; then
+    echo "- The git SSH key has been successfully moved to the '${NEW_VERSION}'."
   else
     echo "- The git SSH key in 'argo-git-deploy' and 'ssh-id-key-secret'"
     echo "  contain fake values and must be updated."
