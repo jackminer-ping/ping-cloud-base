@@ -335,6 +335,7 @@ get_secret_from_yaml() {
 
   # If found, copy it to the provided output file in JSON format.
   if test "${secrets_yaml}"; then
+    set -x
     log "Attempting to retrieve ${secret_key} from ${secrets_yaml}"
     if ! secret_value="$(yq -r ".. | select(has(${secret_key})) | .[]" "${secrets_yaml}")"; then
       log "Unable to parse secret from file ${secrets_yaml}"
@@ -342,6 +343,7 @@ get_secret_from_yaml() {
     if ! secret_value=$(echo "${secret_value}" | base64 "${BASE64_DECODE_OPT}"); then
       log "Error decoding base64 secret"
     fi
+    set +x
   else
     log "ping-cloud secrets.yaml file not found."
   fi
