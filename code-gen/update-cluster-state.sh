@@ -321,24 +321,32 @@ get_base64_decode_opt() {
 # output file. The secrets file is obtained from the currently checked out branch when the method runs.
 #
 # Arguments
-#   $1 secrets_json -> The output file to which to write secrets.yaml in json format.
-#         If the secrets.yaml file is not found, then nothing will be written to the file.
+#   $1 secret -> The secret to retrieve from the secrets.yaml
+# Returns
+# The base64-decoded value of the secret
 ########################################################################################################################
-get_secrets_file_json() {
-  secrets_json="$1"
+get_secret_from_yaml() {
+  local secret_key="${1}"
+  local var_to_set="${2}"
+  local secret_value=""
 
   # Get the path of the secrets.yaml file that has all ping-cloud secrets.
   secrets_yaml="$(find . -name secrets.yaml -type f)"
 
   # If found, copy it to the provided output file in JSON format.
   if test "${secrets_yaml}"; then
-    log "Attempting to transform ${secrets_yaml} from YAML to JSON into ${secrets_json}"
-    if ! yq -o json "${secrets_yaml}" > "${secrets_json}"; then
-      log "Unable to parse secrets from file ${secrets_yaml}"
+    log "Attempting to retrieve ${secret_key} from ${secrets_yaml}"
+    if ! secret_value=$(yq -r ".. | select(has(${secret_key})) | .[]" "${secrets_yaml}"); then
+      log "Unable to parse secret from file ${secrets_yaml}"
+    fi
+    if ! secret_value=$(echo "${secret_value}" | base64 "${BASE64_DECODE_OPT}"); then
+      log "Error decoding base64 secret"
     fi
   else
     log "ping-cloud secrets.yaml file not found."
   fi
+
+  export "${var_to_set}=${secret_value}"
 }
 
 ########################################################################################################################
@@ -352,15 +360,15 @@ get_secrets_file_json() {
 # Returns
 #   The base64-decoded value of the secret, or empty, if the secret is not found.
 ########################################################################################################################
-get_secret_from_file() {
-  secret="$1"
-  secret_file="$2"
-  # Get the data dictionary, if it exists, then grab data with key ${secret} if it exists
-  secret_value="$(jq -r ".. | .data? // empty | .${secret}? // empty" < "${secret_file}")"
-  if test "${secret_value}"; then
-    echo "${secret_value}" | base64 "${BASE64_DECODE_OPT}"
-  fi
-}
+# get_secret_from_file() {
+#   secret="$1"
+#   secret_file="$2"
+#   # Get the data dictionary, if it exists, then grab data with key ${secret} if it exists
+#   secret_value="$(jq -r ".. | .data? // empty | .${secret}? // empty" < "${secret_file}")"
+#   if test "${secret_value}"; then
+#     echo "${secret_value}" | base64 "${BASE64_DECODE_OPT}"
+#   fi
+# }
 
 ########################################################################################################################
 # Retrieve the minimum required secrets required to stand up the out-of-the-box ping-cloud stack into the following
@@ -848,8 +856,10 @@ fi
 # The base environment variables file that's common to all regions.
 BASE_ENV_VARS="${K8S_CONFIGS_DIR}/${BASE_DIR}/${ENV_VARS_FILE_NAME}"
 
-# Get the minimum required ping-cloud secrets (currently, the New Relic key and SSH git key).
-get_min_required_secrets
+# Get existing SSH key from secrets.yaml for upgraded secrets.yaml and place into a file for generate-cluster-state.sh
+get_secret_from_yaml "id_rsa" "ID_RSA_VALUE"
+ID_RSA_FILE=$(mktemp)
+echo "${ID_RSA_VALUE}" > "${ID_RSA_FILE}"
 
 # For each environment:
 #   - Generate code for all its regions
