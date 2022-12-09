@@ -338,9 +338,13 @@ get_secret_from_yaml() {
     log "Attempting to retrieve ${secret_key} from ${secrets_yaml}"
     if ! secret_value="$(yq -r ".. | select(has(\"${secret_key}\")) | .[]" "${secrets_yaml}")"; then
       log "Unable to parse secret from file ${secrets_yaml}"
+    else
+      log "Found ${secret_key} in ${secrets_yaml}"
     fi
     if ! secret_value=$(echo "${secret_value}" | base64 "${BASE64_DECODE_OPT}"); then
       log "Error decoding base64 secret"
+    else
+      log "Successfully decoded base64 secret"
     fi
   else
     log "ping-cloud secrets.yaml file not found."
