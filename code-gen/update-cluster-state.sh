@@ -316,13 +316,6 @@ get_base64_decode_opt() {
   fi
 }
 
-# Kubectl must have a connection to a cluster in order to run - currently used to convert yaml to json
-check_kubectl() {
-  if ! kubectl get ns > /dev/null 2>&1; then
-    log "Warn: You are not connected to a k8s cluster - automatic secret replacement may be affected"
-  fi
-}
-
 ########################################################################################################################
 # Gets the file that has all ping-cloud secrets. If the file is found, then its contents will be written to the provided
 # output file. The secrets file is obtained from the currently checked out branch when the method runs.
@@ -338,10 +331,9 @@ get_secrets_file_json() {
   secrets_yaml="$(find . -name secrets.yaml -type f)"
 
   # If found, copy it to the provided output file in JSON format.
-  # NOTE: it's safer to use kubectl here than a YAML parser like yq, whose options vary by version of the tool, OS, etc.
   if test "${secrets_yaml}"; then
     log "Attempting to transform ${secrets_yaml} from YAML to JSON into ${secrets_json}"
-    if ! kubectl apply -f "${secrets_yaml}" -o json --dry-run 2>/dev/null > "${secrets_json}"; then
+    if ! yq -o json "${secrets_yaml}" > "${secrets_json}"; then
       log "Unable to parse secrets from file ${secrets_yaml}"
     fi
   else
@@ -758,9 +750,7 @@ trap 'finalize' EXIT
 SCRIPT_NAME="$(basename "$0")"
 
 # Check required binaries.
-check_binaries 'kubectl' 'git' 'base64' 'jq' 'envsubst' 'rsync' || exit 1
-
-check_kubectl
+check_binaries 'kubectl' 'git' 'base64' 'jq' 'envsubst' 'rsync' 'yq' || exit 1
 
 # Verify that required environment variable NEW_VERSION is set.
 if test -z "${NEW_VERSION}"; then
