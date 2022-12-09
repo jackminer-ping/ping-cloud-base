@@ -337,7 +337,7 @@ get_secret_from_yaml() {
   if test "${secrets_yaml}"; then
     set -x
     log "Attempting to retrieve ${secret_key} from ${secrets_yaml}"
-    if ! secret_value="$(yq -r ".. | select(has(${secret_key})) | .[]" "${secrets_yaml}")"; then
+    if ! secret_value="$(yq -r ".. | select(has(\"${secret_key}\")) | .[]" "${secrets_yaml}")"; then
       log "Unable to parse secret from file ${secrets_yaml}"
     fi
     if ! secret_value=$(echo "${secret_value}" | base64 "${BASE64_DECODE_OPT}"); then
