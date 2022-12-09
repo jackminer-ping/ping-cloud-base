@@ -317,13 +317,13 @@ get_base64_decode_opt() {
 }
 
 ########################################################################################################################
-# Gets the file that has all ping-cloud secrets. If the file is found, then its contents will be written to the provided
-# output file. The secrets file is obtained from the currently checked out branch when the method runs.
+# Find the secrets.yaml and parse it for the given secret_key, then set the var_to_set to the value under the key
 #
 # Arguments
-#   $1 secret -> The secret to retrieve from the secrets.yaml
+#   $1 secret_key -> The secret key to retrieve from the secrets.yaml
+#   $2 var_to_set -> The variable to set with the value under secret_key from secrets.yaml
 # Returns
-# The base64-decoded value of the secret
+#   The base64-decoded value of the secret, or empty if there is an error or the secret is not found
 ########################################################################################################################
 get_secret_from_yaml() {
   local secret_key="${1}"
@@ -335,7 +335,6 @@ get_secret_from_yaml() {
 
   # If found, copy it to the provided output file in JSON format.
   if test "${secrets_yaml}"; then
-    set -x
     log "Attempting to retrieve ${secret_key} from ${secrets_yaml}"
     if ! secret_value="$(yq -r ".. | select(has(\"${secret_key}\")) | .[]" "${secrets_yaml}")"; then
       log "Unable to parse secret from file ${secrets_yaml}"
@@ -343,61 +342,11 @@ get_secret_from_yaml() {
     if ! secret_value=$(echo "${secret_value}" | base64 "${BASE64_DECODE_OPT}"); then
       log "Error decoding base64 secret"
     fi
-    set +x
   else
     log "ping-cloud secrets.yaml file not found."
   fi
 
   export "${var_to_set}=${secret_value}"
-}
-
-########################################################################################################################
-# Retrieve the base64-decoded value of the secret from the provided file. If the secret is not found, then an empty
-# string is returned.
-#
-# Arguments
-#   $1 -> The secret name.
-#   $2 -> The file containing the secret.
-#
-# Returns
-#   The base64-decoded value of the secret, or empty, if the secret is not found.
-########################################################################################################################
-# get_secret_from_file() {
-#   secret="$1"
-#   secret_file="$2"
-#   # Get the data dictionary, if it exists, then grab data with key ${secret} if it exists
-#   secret_value="$(jq -r ".. | .data? // empty | .${secret}? // empty" < "${secret_file}")"
-#   if test "${secret_value}"; then
-#     echo "${secret_value}" | base64 "${BASE64_DECODE_OPT}"
-#   fi
-# }
-
-########################################################################################################################
-# Retrieve the minimum required secrets required to stand up the out-of-the-box ping-cloud stack into the following
-# environment variables:
-#
-#   - ID_RSA_FILE - SSH key for cloning from git
-#
-# If all the secrets are found, then a global variable named ALL_MIN_SECRETS_FOUND will be set to true.
-########################################################################################################################
-get_min_required_secrets() {
-  secrets_yaml_json="$(mktemp)"
-  log "Attempting to get ping-cloud secrets.yaml into ${secrets_yaml_json}"
-
-  get_secrets_file_json "${secrets_yaml_json}"
-
-  # If secrets.yaml has contents, then attempt to retrieve each required secret.
-  ALL_MIN_SECRETS_FOUND=false
-  if test -s "${secrets_yaml_json}"; then
-    ALL_MIN_SECRETS_FOUND=true
-    ID_RSA_FILE="$(mktemp)"
-    get_secret_from_file 'id_rsa' "${secrets_yaml_json}" > "${ID_RSA_FILE}"
-    if ! test -s "${ID_RSA_FILE}"; then
-      log "SSH key not found in ${ID_RSA_FILE}"
-      ALL_MIN_SECRETS_FOUND=false
-      ID_RSA_FILE=
-    fi
-  fi
 }
 
 ########################################################################################################################
@@ -643,13 +592,11 @@ print_readme() {
   echo "      showing how to patch HPA settings, replica count, mem/cpu request/limits, etc."
   echo
 
-  if "${ALL_MIN_SECRETS_FOUND}"; then
-    echo "- All secrets have been reset to the default for '${NEW_VERSION}'."
+  if "${ID_RSA_VALUE}"; then
+    echo "- The SSH key has been successfully move to the '${NEW_VERSION}'."
   else
-    echo "- All but the following secrets have been reset to the default for '${NEW_VERSION}'"
-    echo
-    echo "    - The git SSH key in 'argo-git-deploy' and 'ssh-id-key-secret' also"
-    echo "      contain fake values and must be updated."
+    echo "- The git SSH key in 'argo-git-deploy' and 'ssh-id-key-secret'"
+    echo "  contain fake values and must be updated."
     echo
     echo "    - Reach out to the platform team to get the right values for these secrets."
   fi
