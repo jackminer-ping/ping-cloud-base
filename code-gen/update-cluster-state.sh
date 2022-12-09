@@ -343,6 +343,10 @@ get_secret_from_yaml() {
     fi
     if ! secret_value=$(echo "${secret_value}" | base64 "${BASE64_DECODE_OPT}"); then
       log "Error decoding base64 secret"
+    fi
+    # If the options were printed out for base64, there was an error (it doesn't exit nonzero on improper usage)
+    if [[ "${secret_value}" == *"Options"* ]]; then
+      log "Error decoding base64 secret"
     else
       log "Successfully decoded base64 secret"
     fi
