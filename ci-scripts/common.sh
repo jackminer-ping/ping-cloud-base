@@ -150,6 +150,7 @@ set_env_vars() {
   PINGDIRECTORY_API=https://pingdirectory${FQDN}
   PINGDIRECTORY_ADMIN=pingdirectory-admin${FQDN}
 
+
   # Pingfederate
   # admin services:
   PINGFEDERATE_CONSOLE=https://pingfederate-admin${FQDN}/pingfederate/app
