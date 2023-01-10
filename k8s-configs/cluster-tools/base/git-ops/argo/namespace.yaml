@@ -1,0 +1,13 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: argocd
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: argo-git-deploy
+  annotations:
+    sealedsecrets.bitnami.com/managed: "true"
+    managed-by: argocd.argoproj.io
+type: Opaque

@@ -4,14 +4,165 @@ apiVersion: kustomize.config.k8s.io/v1beta1
 namespace: argocd
 
 resources:
-- argo.yaml
-- argocd-image-updater.yaml
-- argo-notifications-cm.yaml
+  - argo.yaml
+  - argocd-image-updater.yaml
+  - namespace.yaml
 
 generatorOptions:
   disableNameSuffixHash: true
 
 configMapGenerator:
-- name: install-custom-tools
-  files:
-  - install-custom-tools.sh
+  - name: install-custom-tools
+    files:
+      - install-custom-tools.sh
+
+images:
+  - name: quay.io/argoproj/argocd:v2.5.5
+    newName: public.ecr.aws/r2h3l6e4/jack-test/argocd
+
+patches:
+  - path: argo-notifications-cm.yaml
+
+  # The base yaml was obtained from:
+  # https://raw.githubusercontent.com/argoproj/argo-cd/v2.5.5/manifests/install.yaml
+
+  # The following modifications have been made to it:
+  #   - Added an "argocd" Namespace for all namespace-scoped resources
+  #   - Added an "argo-git-deploy" Secret to hold the SSH key for git cloning
+  #   - Set the ArgoCD UI password to "admin" in the "argocd-secret" secret object
+  #   - Added the "sealedsecrets.bitnami.com/managed: true" annotation to the above secret so it's manageable by Bitnami
+  #   - Added git-ops-command.sh as the config management tool to build the uber Kubernetes YAML
+  #   - Ignore diffs in webhook client CA bundle (ref: https://argo-cd-docs.readthedocs.io/en/latest/user-guide/diffing/)
+  #   - Added an init container to install a few custom tools into the ArgoCD repo server
+  #   - Changed the docker image repo to Amazon ECR repo in CSG AWS account
+  #   - Set the "server.log.level" to "warn" in argocd-cmd-params-cm configMap
+  #   - Set the "controller.log.level" to "warn" in argocd-cmd-params-cm configMap
+  #   - Set the "reposerver.log.level" to "warn" in argocd-cmd-params-cm configMap
+
+patchesStrategicMerge:
+  - |-
+    # Patch to add logging
+    apiVersion: v1
+    kind: ConfigMap
+    metadata:
+      name: argocd-cmd-params-cm
+    data:
+      # Set the logging level. One of: debug|info|warn|error (default "info")
+      controller.log.level: "warn"
+      # Set the logging level. One of: debug|info|warn|error (default "info")
+      server.log.level: "warn"
+      # Set the logging level. One of: debug|info|warn|error (default "info")
+      reposerver.log.level: "warn"
+
+  - |-
+    # Patch to update.... TODO add
+    apiVersion: v1
+    kind: ConfigMap
+    metadata:
+      name: argocd-cm
+    data:
+      accounts.image-updater: apiKey
+      accounts.config-team: apiKey,login
+      configManagementPlugins: |
+        - name: git-ops-command
+          generate:
+            command: [ "git-ops-command.sh" ]
+      resource.customizations: |
+        admissionregistration.k8s.io/MutatingWebhookConfiguration:
+          ignoreDifferences: |
+            jsonPointers:
+            - /webhooks/0/clientConfig/caBundle
+
+  - |-
+    # TODO: add desc
+    apiVersion: v1
+    kind: ConfigMap
+    metadata:
+      name: argocd-rbac-cm
+    data:
+      policy.csv: |
+        p, config-team, applications, action/apps/StatefulSet/restart, *, allow
+      policy.default: role:readonly
+
+  - |-
+    apiVersion: apps/v1
+    kind: Deployment
+    metadata:
+      name: argocd-repo-server
+    spec:
+      template:
+        spec:
+          containers:
+          - name: argocd-repo-server
+            volumeMounts:
+              - name: git-ops-command
+                mountPath: /usr/local/bin/git-ops-command.sh
+                subPath: git-ops-command.sh
+              - name: tools-dir
+                mountPath: /usr/local/bin/envsubst
+                subPath: envsubst
+              - name: tools-dir
+                mountPath: /usr/local/bin/kustomize
+                subPath: kustomize
+              - name: tools-dir
+                mountPath: /usr/local/bin/git-remote-codecommit
+                subPath: git-remote-codecommit
+              - name: tools-dir
+                mountPath: /home/argocd/.local/lib/python3.7/site-packages/git_remote_codecommit/__init__.py
+                subPath: __init__.py
+
+  - |-
+    apiVersion: apps/v1
+    kind: Deployment
+    metadata:
+      name: argocd-repo-server
+    spec:
+      template:
+        spec:
+          initContainers:
+          # Installs custom tools
+          - name: install-custom-tools
+            image: public.ecr.aws/r2h3l6e4/pingcloud-clustertools/python:3.9.1-slim
+            command: [ "install-custom-tools.sh" ]
+            volumeMounts:
+            - name: tools-dir
+              mountPath: /tools
+            - name: install-custom-tools
+              mountPath: /usr/local/bin/install-custom-tools.sh
+              subPath: install-custom-tools.sh
+
+  - |-
+    apiVersion: apps/v1
+    kind: Deployment
+    metadata:
+      name: argocd-repo-server
+    spec:
+      template:
+        spec:
+          volumes:
+          - name: tools-dir
+            emptyDir: {}
+          - name: git-ops-command
+            configMap:
+              name: git-ops-command
+              defaultMode: 0555
+          - name: install-custom-tools
+            configMap:
+              name: install-custom-tools
+              defaultMode: 0555
+
+  - |-
+    apiVersion: v1
+    kind: Secret
+    metadata:
+      name: argocd-notifications-secret
+      annotations:
+        sealedsecrets.bitnami.com/managed: "true"
+
+  - |-
+    apiVersion: v1
+    kind: Secret
+    metadata:
+      name: argocd-secret
+      annotations:
+        sealedsecrets.bitnami.com/managed: "true"
