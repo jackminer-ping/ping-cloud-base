@@ -9760,11 +9760,12 @@ metadata:
     app.kubernetes.io/part-of: argocd
   name: argocd-gpg-keys-cm
 ---
-apiVersion: v1
-kind: ConfigMap
-metadata:
-  name: argocd-notifications-cm
----
+# Comment out for now, but ideally fix with kustomize
+# apiVersion: v1
+# kind: ConfigMap
+# metadata:
+#   name: argocd-notifications-cm
+# ---
 apiVersion: v1
 kind: ConfigMap
 data:
@@ -10473,6 +10474,21 @@ spec:
           name: helm-working-dir
         - mountPath: /home/argocd/cmp-server/plugins
           name: plugins
+        - name: git-ops-command
+          mountPath: /usr/local/bin/git-ops-command.sh
+          subPath: git-ops-command.sh
+        - name: tools-dir
+          mountPath: /usr/local/bin/envsubst
+          subPath: envsubst
+        - name: tools-dir
+          mountPath: /usr/local/bin/kustomize
+          subPath: kustomize
+        - name: tools-dir
+          mountPath: /usr/local/bin/git-remote-codecommit
+          subPath: git-remote-codecommit
+        - name: tools-dir
+          mountPath: /home/argocd/.local/lib/python3.7/site-packages/git_remote_codecommit/__init__.py
+          subPath: __init__.py
       initContainers:
       - command:
         - cp
