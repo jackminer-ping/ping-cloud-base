@@ -22,6 +22,8 @@ images:
     newName: public.ecr.aws/r2h3l6e4/jack-test/argocd
   - name: redis:7.0.5-alpine
     newName: public.ecr.aws/r2h3l6e4/jack-test/redis
+  - name: ghcr.io/dexidp/dex
+    newName: public.ecr.aws/r2h3l6e4/jack-test/dex
 
 patches:
   - path: argo-notifications-cm.yaml
