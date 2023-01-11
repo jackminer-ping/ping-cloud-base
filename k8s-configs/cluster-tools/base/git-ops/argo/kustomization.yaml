@@ -17,8 +17,11 @@ configMapGenerator:
       - install-custom-tools.sh
 
 images:
-  - name: quay.io/argoproj/argocd:v2.5.5
+  # TODO - CHANGE BEFORE MERGE: Blocked on changes to ping-cluster-tools to non-rate-limited pulls from Dockerhub
+  - name: quay.io/argoproj/argocd
     newName: public.ecr.aws/r2h3l6e4/jack-test/argocd
+  - name: redis:7.0.5-alpine
+    newName: public.ecr.aws/r2h3l6e4/jack-test/redis
 
 patches:
   - path: argo-notifications-cm.yaml
