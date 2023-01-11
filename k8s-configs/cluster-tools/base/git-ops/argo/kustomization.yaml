@@ -4,9 +4,9 @@ apiVersion: kustomize.config.k8s.io/v1beta1
 namespace: argocd
 
 resources:
-  - argo.yaml
+  - base
   - argocd-image-updater.yaml
-  - namespace.yaml
+  - custom-resources.yaml
 
 generatorOptions:
   disableNameSuffixHash: true
@@ -23,23 +23,8 @@ images:
 patches:
   - path: argo-notifications-cm.yaml
 
-  # The base yaml was obtained from:
-  # https://raw.githubusercontent.com/argoproj/argo-cd/v2.5.5/manifests/install.yaml
-
-  # The following modifications have been made to it:
-  #   - Added an "argocd" Namespace for all namespace-scoped resources
-  #   - Added an "argo-git-deploy" Secret to hold the SSH key for git cloning
-  #   - Set the ArgoCD UI password to "admin" in the "argocd-secret" secret object
-  #   - Added the "sealedsecrets.bitnami.com/managed: true" annotation to the above secret so it's manageable by Bitnami
-  #   - Added git-ops-command.sh as the config management tool to build the uber Kubernetes YAML
-  #   - Ignore diffs in webhook client CA bundle (ref: https://argo-cd-docs.readthedocs.io/en/latest/user-guide/diffing/)
-  #   - Added an init container to install a few custom tools into the ArgoCD repo server
-  #   - Changed the docker image repo to Amazon ECR repo in CSG AWS account
-  #   - Set the "server.log.level" to "warn" in argocd-cmd-params-cm configMap
-  #   - Set the "controller.log.level" to "warn" in argocd-cmd-params-cm configMap
-  #   - Set the "reposerver.log.level" to "warn" in argocd-cmd-params-cm configMap
-
 patchesStrategicMerge:
+  # Set the several log values to "warn"
   - |-
     # Patch to add logging
     apiVersion: v1
@@ -49,11 +34,11 @@ patchesStrategicMerge:
     data:
       # Set the logging level. One of: debug|info|warn|error (default "info")
       controller.log.level: "warn"
-      # Set the logging level. One of: debug|info|warn|error (default "info")
       server.log.level: "warn"
-      # Set the logging level. One of: debug|info|warn|error (default "info")
       reposerver.log.level: "warn"
 
+  # Add git-ops-command.sh as the config management tool to build the uber Kubernetes YAML
+  # Ignore diffs in webhook client CA bundle (ref: https://argo-cd-docs.readthedocs.io/en/latest/user-guide/diffing/)
   - |-
     # Patch to update.... TODO add
     apiVersion: v1
@@ -111,6 +96,7 @@ patchesStrategicMerge:
                 mountPath: /home/argocd/.local/lib/python3.7/site-packages/git_remote_codecommit/__init__.py
                 subPath: __init__.py
 
+  # Add an init container to install a few custom tools into the ArgoCD repo server
   - |-
     apiVersion: apps/v1
     kind: Deployment
@@ -151,6 +137,7 @@ patchesStrategicMerge:
               name: install-custom-tools
               defaultMode: 0555
 
+  # Add the "sealedsecrets.bitnami.com/managed: true" annotation to secrets so it's manageable by Bitnami
   - |-
     apiVersion: v1
     kind: Secret

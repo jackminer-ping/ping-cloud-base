@@ -1,8 +1,10 @@
+# Add an "argocd" Namespace for all namespace-scoped resources
 apiVersion: v1
 kind: Namespace
 metadata:
   name: argocd
 ---
+# Add an "argo-git-deploy" Secret to hold the SSH key for git cloning
 apiVersion: v1
 kind: Secret
 metadata:
