@@ -31,7 +31,6 @@ patches:
 patchesStrategicMerge:
   # Set the several log values to "warn"
   - |-
-    # Patch to add logging
     apiVersion: v1
     kind: ConfigMap
     metadata:
@@ -43,9 +42,10 @@ patchesStrategicMerge:
       reposerver.log.level: "warn"
 
   # Add git-ops-command.sh as the config management tool to build the uber Kubernetes YAML
+  # TODO: update the configManagementPlugins to run via a Sidecar - this won't happen until at least Argo 2.6
+  # -> Issue: https://github.com/argoproj/argo-cd/issues/8117
   # Ignore diffs in webhook client CA bundle (ref: https://argo-cd-docs.readthedocs.io/en/latest/user-guide/diffing/)
   - |-
-    # Patch to update.... TODO add
     apiVersion: v1
     kind: ConfigMap
     metadata:
@@ -65,7 +65,6 @@ patchesStrategicMerge:
 
   # Policy for a user 'config-team` to allow restart on K8s StatefulSets
   - |-
-    # TODO: add desc
     apiVersion: v1
     kind: ConfigMap
     metadata:
