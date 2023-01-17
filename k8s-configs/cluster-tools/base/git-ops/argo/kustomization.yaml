@@ -16,14 +16,14 @@ configMapGenerator:
     files:
       - install-custom-tools.sh
 
+# Point to the ping-cluster-tools repo equivalents pushed to ECR
 images:
-  # TODO - CHANGE BEFORE MERGE: Blocked on changes to ping-cluster-tools to non-rate-limited pulls from Dockerhub
   - name: quay.io/argoproj/argocd
-    newName: public.ecr.aws/r2h3l6e4/jack-test/argocd
-  - name: redis:7.0.5-alpine
-    newName: public.ecr.aws/r2h3l6e4/jack-test/redis
+    newName: public.ecr.aws/r2h3l6e4/pingcloud-clustertools/argo/argocd
+  - name: redis
+    newName: public.ecr.aws/r2h3l6e4/pingcloud-clustertools/redis
   - name: ghcr.io/dexidp/dex
-    newName: public.ecr.aws/r2h3l6e4/jack-test/dex
+    newName: public.ecr.aws/r2h3l6e4/pingcloud-clustertools/dexidp/dex
 
 patches:
   - path: argo-notifications-cm.yaml
@@ -63,6 +63,7 @@ patchesStrategicMerge:
             jsonPointers:
             - /webhooks/0/clientConfig/caBundle
 
+  # Policy for a user 'config-team` to allow restart on K8s StatefulSets
   - |-
     # TODO: add desc
     apiVersion: v1
@@ -74,6 +75,7 @@ patchesStrategicMerge:
         p, config-team, applications, action/apps/StatefulSet/restart, *, allow
       policy.default: role:readonly
 
+  # Mount Beluga-specific scripts within the container
   - |-
     apiVersion: apps/v1
     kind: Deployment
@@ -122,6 +124,7 @@ patchesStrategicMerge:
               mountPath: /usr/local/bin/install-custom-tools.sh
               subPath: install-custom-tools.sh
 
+  # Add Beluga-specific volumes to the pod
   - |-
     apiVersion: apps/v1
     kind: Deployment
@@ -142,7 +145,7 @@ patchesStrategicMerge:
               name: install-custom-tools
               defaultMode: 0555
 
-  # Add the "sealedsecrets.bitnami.com/managed: true" annotation to secrets so it's manageable by Bitnami
+  # Add the "sealedsecrets.bitnami.com/managed: true" annotation to secrets so they are manageable by Bitnami
   - |-
     apiVersion: v1
     kind: Secret
