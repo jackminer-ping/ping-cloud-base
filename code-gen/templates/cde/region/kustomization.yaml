@@ -218,6 +218,8 @@ patchesStrategicMerge:
 - ../base/cluster-tools/logging/remove-from-secondary-patch.yaml
 - ../base/cluster-tools/health/remove-from-secondary-patch.yaml
 
-### Dev CDE Environment - the following will be COMMENTED OUT unless we are in a Dev CDE
+### Dev CDE Environment - the following will be UNCOMMENTED if we are in a Dev CDE
 
+### CloudWatch is disabled by default in Dev CDEs for cost savings
+### If you want CloudWatch enabled in a Dev CDE, make sure the below is commented out *in your CSR*
 # - ../base/cluster-tools/monitoring/remove-from-dev-cde-patch.yaml
