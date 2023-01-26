@@ -217,3 +217,7 @@ patchesStrategicMerge:
 - ../base/cluster-tools/monitoring/remove-from-secondary-patch.yaml
 - ../base/cluster-tools/logging/remove-from-secondary-patch.yaml
 - ../base/cluster-tools/health/remove-from-secondary-patch.yaml
+
+### Dev CDE Environment - the following will be COMMENTED OUT unless we are in a Dev CDE
+
+# - ../base/cluster-tools/monitoring/remove-from-dev-cde-patch.yaml

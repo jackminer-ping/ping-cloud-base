@@ -1071,9 +1071,9 @@ for ENV_OR_BRANCH in ${ENVIRONMENTS}; do
   substitute_vars "${ENV_DIR}" "${REPO_VARS}" values.yaml
   substitute_vars "${ENV_DIR}" '${IS_BELUGA_ENV}' values.yaml
 
+  PRIMARY_PING_KUST_FILE="${ENV_DIR}/${REGION_NICK_NAME}/kustomization.yaml"
   # Regional enablement - add admins, backups, etc. to primary.
   if test "${TENANT_DOMAIN}" = "${PRIMARY_TENANT_DOMAIN}"; then
-    PRIMARY_PING_KUST_FILE="${ENV_DIR}/${REGION_NICK_NAME}/kustomization.yaml"
     sed -i.bak 's/^\(.*remove-from-secondary-patch.yaml\)$/# \1/g' "${PRIMARY_PING_KUST_FILE}"
     rm -f "${PRIMARY_PING_KUST_FILE}.bak"
   fi
@@ -1082,6 +1082,9 @@ for ENV_OR_BRANCH in ${ENVIRONMENTS}; do
     BASE_ENV_VARS="${ENV_DIR}/base/env_vars"
     echo >> "${BASE_ENV_VARS}"
     echo "IS_BELUGA_ENV=true" >> "${BASE_ENV_VARS}"
+    # Update patches related to Beluga Dev CDEs
+    sed -E -i.bak 's/^# \(.*remove-from-dev-cde-patch.yaml\)$/\1/g' "${PRIMARY_PING_KUST_FILE}"
+    rm -f "${PRIMARY_PING_KUST_FILE}.bak"
   fi
 
   echo "Copying server profiles for environment ${ENV}"
