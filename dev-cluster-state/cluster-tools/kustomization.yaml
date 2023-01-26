@@ -518,5 +518,3 @@ patchesJson6902:
     - op: add
       path: /spec/template/spec/priorityClassName
       value: cluster-tool-daemonset-priority
-
-  
