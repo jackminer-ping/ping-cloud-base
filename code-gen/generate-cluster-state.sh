@@ -1082,7 +1082,7 @@ for ENV_OR_BRANCH in ${ENVIRONMENTS}; do
     BASE_ENV_VARS="${ENV_DIR}/base/env_vars"
     echo >> "${BASE_ENV_VARS}"
     echo "IS_BELUGA_ENV=true" >> "${BASE_ENV_VARS}"
-    # Update patches related to Beluga Dev CDEs
+    # Update patches related to Beluga developer CDEs
     sed -i.bak 's/^# \(.*remove-from-dev-cde-patch.yaml\)$/\1/g' "${PRIMARY_PING_KUST_FILE}"
     rm -f "${PRIMARY_PING_KUST_FILE}.bak"
   fi

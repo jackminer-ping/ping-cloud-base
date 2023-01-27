@@ -1,4 +1,5 @@
-# Delete the CloudWatch DaemonSet to reduce costs in dev CDEs - comment out to enable if required for testing
+# Delete the CloudWatch DaemonSet to reduce costs in developer CDEs - comment out patch in
+# CSR/k8s-configs/REGION/kustomization.yaml in order to enable
 apiVersion: apps/v1
 kind: DaemonSet
 metadata:
