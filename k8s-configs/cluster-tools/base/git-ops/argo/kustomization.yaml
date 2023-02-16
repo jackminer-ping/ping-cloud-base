@@ -179,4 +179,4 @@ patchesStrategicMerge:
             image: 705370621539.dkr.ecr.us-west-2.amazonaws.com/pingcloud-services/argocd-bootstrap:PDO-4987-argo-create-cluster
             envFrom:
               - configMapRef:
-                name: argocd-bootstrap
+                  name: argocd-bootstrap

@@ -18,5 +18,5 @@ type: Opaque
 apiVersion: v1
 kind: ConfigMap
 metadata:
-  name: argo-bootstrap
+  name: argocd-bootstrap
   namespace: argocd
