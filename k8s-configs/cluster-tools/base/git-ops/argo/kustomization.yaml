@@ -163,3 +163,20 @@ patchesStrategicMerge:
       name: argocd-secret
       annotations:
         sealedsecrets.bitnami.com/managed: "true"
+
+
+  # Add init container to create all CDEs for Argo
+  - |-
+    apiVersion: apps/v1
+    kind: Deployment
+    metadata:
+      name: argocd-server
+    spec:
+      template:
+        spec:
+          initContainers:
+          - name: argocd-bootstrap
+            image: 705370621539.dkr.ecr.us-west-2.amazonaws.com/pingcloud-services/argocd-bootstrap:PDO-4987-argo-create-cluster
+          envFrom:
+            - configMapRef:
+              name: argocd-bootstrap
