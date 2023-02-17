@@ -63,5 +63,6 @@ patchesJson6902:
     namespace: argocd
   patch: |
     - op: add
-      path: /data/ENVIRONMENTS
-      value: ${ENVIRONMENTS}
+      path: /data
+      value:
+        ENVIRONMENTS: ${ENVIRONMENTS}
