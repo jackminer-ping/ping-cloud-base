@@ -65,4 +65,6 @@ patchesJson6902:
     - op: add
       path: /data
       value:
+        ARGOCD_BOOTSTRAP_ENABLED: ${ARGOCD_BOOTSTRAP_ENABLED}
+        ARGOCD_SLACK_TOKEN_SSM_PATH: ${ARGOCD_SLACK_TOKEN_SSM_PATH}
         ENVIRONMENTS: ${ENVIRONMENTS}
