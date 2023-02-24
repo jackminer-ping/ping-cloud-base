@@ -854,6 +854,7 @@ export PA_GCOPTION='-XX:+UseParallelGC'
 ########################################################################################################################
 echo "Using TENANT_NAME: ${TENANT_NAME}"
 echo "Using SIZE: ${SIZE}"
+echo "Using ENVIRONMENTS: ${ENVIRONMENTS}"
 
 echo "Using IS_MULTI_CLUSTER: ${IS_MULTI_CLUSTER}"
 echo "Using PLATFORM_EVENT_QUEUE_NAME: ${PLATFORM_EVENT_QUEUE_NAME}"
