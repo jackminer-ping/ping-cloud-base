@@ -93,7 +93,7 @@ ENVIRONMENT_TYPE=${ENVIRONMENT_TYPE}
 
 # A space-delimited list of the environments a customer is paying for
 # This will lengthen or shorten should a customer add or remove environments
-ENVIRONMENTS=${ENVIRONMENTS}
+ENVIRONMENTS="${ENVIRONMENTS}"
 
 # Used by Kubernetes manifests
 ENV=${ENV}

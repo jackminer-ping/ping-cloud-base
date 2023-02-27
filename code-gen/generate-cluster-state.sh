@@ -69,8 +69,8 @@
 # ARGOCD_SLACK_TOKEN_SSM_PATH  | SSM path to secret token for ArgoCD slack          | The SSM path:
 #                              | notifications                                      | ssm://pcpt/argocd/notification/slack/access_token
 #                              |                                                    |
-# ARGOCD_CDE_ROLE_SSM_TEMPLATE | SSM template path for the ArgoCD Chub -> CDE roles | The SSM template path:
-#                              | notifications                                      | /argo-bootstrap-integration/pcpt/config/k8s-config/accounts/{env}/argo/role/arn
+# ARGOCD_CDE_ROLE_SSM_TEMPLATE | SSM template path for the ArgoCD Chub -> CDE roles | The SSM template (to be rendered in python script) path:
+#                              | notifications                                      | '/argo-bootstrap-integration/pcpt/config/k8s-config/accounts/{env}/argo/role/arn'
 #                              |                                                    |
 # ARGOCD_BOOTSTRAP_ENABLED     | Feature flag to enabled/disable ArgoCD Chub -> CDE | The string "false"
 #                              | bootstrapping itself                               |
@@ -166,7 +166,7 @@
 #                              | must use an https scheme as shown by the default   |
 #                              | value.                                             |
 #                              |                                                    |
-# PING_IDENTITY_DEVOPS_KEY     | The key to the devops user.                         | The SSM path:
+# PING_IDENTITY_DEVOPS_KEY     | The key to the devops user.                        | The SSM path:
 #                              |                                                    | ssm://pcpt/devops-license/key
 #                              |                                                    |
 # PING_IDENTITY_DEVOPS_USER    | A user with license to run Ping Software.          | The SSM path:
@@ -774,7 +774,7 @@ export ARGOCD_BOOTSTRAP_ENABLED="${ARGOCD_BOOTSTRAP_ENABLED:-false}"
 export ECR_REGISTRY_NAME='public.ecr.aws/r2h3l6e4'
 export PING_CLOUD_NAMESPACE='ping-cloud'
 export MYSQL_DATABASE='pingcentral'
-export ARGOCD_CDE_ROLE_SSM_TEMPLATE="${ARGOCD_CDE_ROLE_SSM_TEMPLATE:-"/pcpt/config/k8s-config/accounts/{env}/argo/role/arn"}"
+export ARGOCD_CDE_ROLE_SSM_TEMPLATE="${ARGOCD_CDE_ROLE_SSM_TEMPLATE:-'/pcpt/config/k8s-config/accounts/{env}/argo/role/arn'}"
 
 # Set Slack-related environment variables and override it's values depending on IS_GA value.
 get_is_ga_variable '/pcpt/stage/is-ga'
