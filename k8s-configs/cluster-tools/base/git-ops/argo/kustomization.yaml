@@ -175,7 +175,6 @@ patchesStrategicMerge:
         spec:
           initContainers:
           - name: argocd-bootstrap
-            # TODO: change when PCD is merged
             image: public.ecr.aws/r2h3l6e4/pingcloud-services/argocd-bootstrap/dev:v1.18-release-branch-latest
             imagePullPolicy: Always
             envFrom:
