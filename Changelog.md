@@ -29,6 +29,7 @@
 - Update cluster tools to latest version: metrics-server v0.6.2
 - Update all PodDisruptionBudget resources to API v1
 - [need before EKS 1.25] batch/v1beta1 CronJob is deprecated in v1.21+, unavailable in v1.25+; use batch/v1 CronJob
+- Update cluster tools to latest version: cloudwatch-agent to v1.247357.0
 - Add init container for ArgoCD to create clusters for itself
 
 _Changes:_
@@ -45,6 +46,7 @@ _Changes:_
 - [X] PDO-4706 Update cluster tools to latest version: metrics-server v0.6.2
 - [X] PDO-4709 Update cluster tools to latest version: Grafana v9.3.6
 - [X] PDO-4713 Update cluster tools to latest version: prometheus to v2.42.0
+- [X] PDo-4716 Update cluster tools to latest version: cloudwatch-agent to v1.247357.0
 - [X] PDO-4765 Disable the CloudWatch Agent in development environments and development CDEs
 - [X] PDO-4773 Update generate-cluster-state script to create base and region values.yaml files
 - [X] PDO-4774 Update generate-cluster-state script to massage the new code-gen structure files into the new CSR structure
@@ -66,6 +68,7 @@ _Changes:_
 - [X] PDO-4987 Add ArgoCD Bootstrap init container to create clusters
 - [X] PDO-4997 Update values.yaml in region and base path sync with env_vars file
 - [X] PDO-5037 Update to replace deprecated topologyKey to topology.kubernetes.io/zone 
+- [X] PDO-5039 Automate cleanup of external dns records for CI/CD clusters 
 
 ### 1.17.0.0
 
@@ -104,6 +107,8 @@ _Changes:_
 - Revert removing alertmanager from the prometheus config
 - Add PF transaction logs parsing and indexing
 - Fix regional variable for new customer creation
+- Installed EBS CSI driver
+- Replace deprecated topologyKey
 
 _Changes:_
 
@@ -153,6 +158,20 @@ _Changes:_
 - [X] PDO-4922 Fix regional variable for new customer creation
 - [X] PDO-4967 Enable storage class resizing for PGO storageclass
 - [X] PDO-4973 REGION_ENV should be defined before using it in ENVIRONMENT_PREFIX in Region env_vars
+- [X] PDO-4984 Install EBS CSI driver
+- [X] PDO-5015 Disable integration test for PF user authentication healthcheck
+- [X] PDO-5037 Update to replace deprecated topologyKey to topology.kubernetes.io/zone
+- [X] PDO-5061 Replace healthcheck jobs with deployments
+
+### 1.16.2.0
+
+- Healthcheck cronjobs replaced with deployments
+- Replace deprecated topologyKey
+
+_Changes:_
+
+- [X] PDO-5014 Replace healthcheck jobs with deployments
+- [X] PDO-5037 Update to replace deprecated topologyKey to topology.kubernetes.io/zone
 
 ### 1.16.1.0
 
