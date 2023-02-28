@@ -164,7 +164,7 @@ patchesStrategicMerge:
       annotations:
         sealedsecrets.bitnami.com/managed: "true"
 
-  # Add init container to create all CDEs for Argo
+  # Add init container to create Argo clusters for all CDEs from customer-hub
   - |-
     apiVersion: apps/v1
     kind: Deployment
