@@ -94,7 +94,7 @@ _Changes:_
 - [X] PDO-4987 Add ArgoCD Bootstrap init container to create clusters
 - [X] PDO-4988 Add ArgoCD Applications for each CDE via ApplicationSet
 - [X] PDO-4989 Add ArgoCD ApplicationSet support for multiple CDEs
-- [X] PDO-4991 Deploy ArgoCD to customer-hub only
+- [X] PDO-4991 Add ArgoCD Applications for each CDE via ApplicationSet
 - [X] PDO-4997 Update values.yaml in region and base path sync with env_vars file
 - [X] PDO-5008 Update tagging script to return correct tag
 - [X] PDO-5009 Add logstash HPA and upgrade resources
