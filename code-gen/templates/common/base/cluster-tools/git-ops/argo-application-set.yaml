@@ -16,7 +16,7 @@ spec:
   template:
     metadata:
       # {{name}} is cluster name from the cluster generator above
-      name: "ping-cloud-{{name}}-${TENANT_NAME}-${REGION_NICK_NAME}"
+      name: "{{name}}-${REGION_NICK_NAME}"
       namespace: argocd
       annotations:
         argocd-image-updater.argoproj.io/git-branch: "{{name}}"
@@ -56,16 +56,23 @@ metadata:
   namespace: argocd
 spec:
   generators:
-    - git:
-        repoURL: ${CLUSTER_STATE_REPO_URL}
-        revision: ${CLUSTER_STATE_REPO_BRANCH}
-        directories:
-          - path: "*"
-          - path: k8s-configs
-            exclude: true
+    - matrix:
+        generators:
+          - git:
+              repoURL: ${CLUSTER_STATE_REPO_URL}
+              revision: ${CLUSTER_STATE_REPO_BRANCH}
+              directories:
+                - path: "*"
+                - path: k8s-configs
+                  exclude: true
+          - clusters:
+              selector:
+                matchLabels:
+                  # Custom label created by argocd-bootstrap, only target these clusters
+                  ping.cloud.argo.auto-configure: "true"
   template:
     metadata:
-      name: "${REGION_NICK_NAME}-{{path.basename}}"
+      name: "{{name}}-${REGION_NICK_NAME}-{{path.basename}}"
       annotations:
         argocd-image-updater.argoproj.io/git-branch: ${CLUSTER_STATE_REPO_BRANCH}
         argocd-image-updater.argoproj.io/image-list: ${IMAGE_LIST}
