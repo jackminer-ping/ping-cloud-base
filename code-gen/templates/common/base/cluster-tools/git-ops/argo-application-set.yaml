@@ -72,9 +72,10 @@ spec:
                   ping.cloud.argo.auto-configure: "true"
   template:
     metadata:
+      # {{name}} is cluster name from the cluster generator above
       name: "{{name}}-${REGION_NICK_NAME}-{{path.basename}}"
       annotations:
-        argocd-image-updater.argoproj.io/git-branch: ${CLUSTER_STATE_REPO_BRANCH}
+        argocd-image-updater.argoproj.io/git-branch: "{{name}}"
         argocd-image-updater.argoproj.io/image-list: ${IMAGE_LIST}
         argocd-image-updater.argoproj.io/apps.update-strategy: latest
         argocd-image-updater.argoproj.io/apps.allow-tags: regexp:^${IMAGE_TAG_PREFIX}.[0-9]+$
@@ -86,10 +87,10 @@ spec:
       project: default
       source:
         repoURL: ${CLUSTER_STATE_REPO_URL}
-        targetRevision: ${CLUSTER_STATE_REPO_BRANCH}
+        targetRevision: "{{name}}"
         path: "{{path}}/${REGION_NICK_NAME}"
       destination:
-        server: https://kubernetes.default.svc
+        server: "{{server}}"
       ignoreDifferences:
         - group: batch
           kind: Job
