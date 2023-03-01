@@ -37,7 +37,7 @@ spec:
         automated:
           prune: true
       destination:
-        server: https://kubernetes.default.svc
+        server: "{{server}}"
       project: default
       source:
         path: k8s-configs/${REGION_NICK_NAME}
