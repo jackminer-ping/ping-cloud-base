@@ -11,8 +11,8 @@ spec:
     - clusters:
         selector:
           matchLabels:
-            # Custom label created by argocd-bootstrap, only target those clusters
-            ping.cloud.auto-configure-per-cde: "true"
+            # Custom label created by argocd-bootstrap, only target these clusters
+            ping.cloud.argo.auto-configure: "true"
   template:
     metadata:
       # {{name}} is cluster name from the cluster generator above
@@ -66,14 +66,15 @@ spec:
   template:
     metadata:
       name: "${REGION_NICK_NAME}-{{path.basename}}"
-      argocd-image-updater.argoproj.io/git-branch: ${CLUSTER_STATE_REPO_BRANCH}
-      argocd-image-updater.argoproj.io/image-list: ${IMAGE_LIST}
-      argocd-image-updater.argoproj.io/apps.update-strategy: latest
-      argocd-image-updater.argoproj.io/apps.allow-tags: regexp:^${IMAGE_TAG_PREFIX}.[0-9]+$
-      argocd-image-updater.argoproj.io/write-back-method: git:secret:argocd/argocd-image-updater-ssh-key
-      argocd-image-updater.argoproj.io/write-back-target: kustomization
-      notifications.argoproj.io/subscribe.on-sync-failed.slack: ${SLACK_CHANNEL}
-      notifications.argoproj.io/subscribe.on-sync-status-unknown.slack: ${SLACK_CHANNEL}
+      annotations:
+        argocd-image-updater.argoproj.io/git-branch: ${CLUSTER_STATE_REPO_BRANCH}
+        argocd-image-updater.argoproj.io/image-list: ${IMAGE_LIST}
+        argocd-image-updater.argoproj.io/apps.update-strategy: latest
+        argocd-image-updater.argoproj.io/apps.allow-tags: regexp:^${IMAGE_TAG_PREFIX}.[0-9]+$
+        argocd-image-updater.argoproj.io/write-back-method: git:secret:argocd/argocd-image-updater-ssh-key
+        argocd-image-updater.argoproj.io/write-back-target: kustomization
+        notifications.argoproj.io/subscribe.on-sync-failed.slack: ${SLACK_CHANNEL}
+        notifications.argoproj.io/subscribe.on-sync-status-unknown.slack: ${SLACK_CHANNEL}
     spec:
       project: default
       source:
