@@ -12,14 +12,14 @@ spec:
         selector:
           matchLabels:
             # Custom label created by argocd-bootstrap, only target these clusters
-            ping.cloud.argo.auto-configure: "true"
+            argocd-auto-configure: "true"
   template:
     metadata:
-      # {{name}} is cluster name from the cluster generator above
+      # CLUSTER_TARGET is typically {{name}} which is the cluster name from the generator above
       name: "{{name}}-${REGION_NICK_NAME}"
       namespace: argocd
       annotations:
-        argocd-image-updater.argoproj.io/git-branch: "{{name}}"
+        argocd-image-updater.argoproj.io/git-branch: "{{metadata.labels.argocd-branch}}"
         argocd-image-updater.argoproj.io/image-list: ${IMAGE_LIST}
         argocd-image-updater.argoproj.io/apps.update-strategy: latest
         argocd-image-updater.argoproj.io/apps.allow-tags: regexp:^${IMAGE_TAG_PREFIX}.[0-9]+$
@@ -42,7 +42,7 @@ spec:
       source:
         path: k8s-configs/${REGION_NICK_NAME}
         repoURL: ${CLUSTER_STATE_REPO_URL}
-        targetRevision: "{{name}}"
+        targetRevision: "{{metadata.labels.argocd-branch}}"
         plugin:
           name: git-ops-command
 
@@ -69,13 +69,13 @@ spec:
               selector:
                 matchLabels:
                   # Custom label created by argocd-bootstrap, only target these clusters
-                  ping.cloud.argo.auto-configure: "true"
+                  argocd-auto-configure: "true"
   template:
     metadata:
       # {{name}} is cluster name from the cluster generator above
       name: "{{name}}-${REGION_NICK_NAME}-{{path.basename}}"
       annotations:
-        argocd-image-updater.argoproj.io/git-branch: "{{name}}"
+        argocd-image-updater.argoproj.io/git-branch: "{{metadata.labels.argocd-branch}}"
         argocd-image-updater.argoproj.io/image-list: ${IMAGE_LIST}
         argocd-image-updater.argoproj.io/apps.update-strategy: latest
         argocd-image-updater.argoproj.io/apps.allow-tags: regexp:^${IMAGE_TAG_PREFIX}.[0-9]+$
@@ -87,7 +87,7 @@ spec:
       project: default
       source:
         repoURL: ${CLUSTER_STATE_REPO_URL}
-        targetRevision: "{{name}}"
+        targetRevision: "{{metadata.labels.argocd-branch}}"
         path: "{{path}}/${REGION_NICK_NAME}"
       destination:
         server: "{{server}}"
