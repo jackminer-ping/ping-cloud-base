@@ -7,6 +7,8 @@ metadata:
   name: "ping-cloud-all-cdes"
   namespace: argocd
 spec:
+  syncPolicy:
+    preserveResourcesOnDeletion: true
   generators:
     - clusters:
         selector:
@@ -36,6 +38,7 @@ spec:
       syncPolicy:
         automated:
           prune: true
+        preserveResourcesOnDeletion: true
       destination:
         server: "{{server}}"
       project: default
@@ -55,6 +58,8 @@ metadata:
   name: "ping-cloud-${CLUSTER_STATE_REPO_BRANCH}-${TENANT_NAME}-${REGION_NICK_NAME}-per-app"
   namespace: argocd
 spec:
+  syncPolicy:
+    preserveResourcesOnDeletion: true
   generators:
     - matrix:
         generators:
