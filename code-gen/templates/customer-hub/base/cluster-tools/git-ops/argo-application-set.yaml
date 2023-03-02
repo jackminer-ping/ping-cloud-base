@@ -38,6 +38,7 @@ spec:
       syncPolicy:
         automated:
           prune: true
+        preserveResourcesOnDeletion: true
       destination:
         server: "{{server}}"
       project: default
