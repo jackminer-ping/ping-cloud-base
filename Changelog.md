@@ -18,8 +18,11 @@
 - Updated cluster-autoscaler to v1.23.0
 - Upgrade Grafana to v9.3.6
 - Upgrade prometheus to v2.42.0
+- Upgrade EFS Driver to v1.5.1
 - Add PF requests logs parsing and indexing
 - Fix index template creation race condition issue
+- Update the PD backup job to create new PV at the start of the job and mount it
+- Update the PD restore job to create new PV at the start of the job and mount it
 - Change retry interval for PGO firing alert notification in slack from 5 min to 60 min
 - Added karpenter v0.24.0 and required parameters, KarpenterControllerRole & ClusterEndPoint
 - ILM policy for alerts index changed to move index to warm after 7 days in hot and delete index after 30 days
@@ -29,12 +32,15 @@
 - Update cluster tools to latest version: metrics-server v0.6.2
 - Update all PodDisruptionBudget resources to API v1
 - [need before EKS 1.25] batch/v1beta1 CronJob is deprecated in v1.21+, unavailable in v1.25+; use batch/v1 CronJob
+- Remove node-role.kubernetes.io/master (deprecated)
 - Update cluster tools to latest version: newrelic java agent to v8.0.1
+- Update newrelic-infrastructure images
 - Update cluster tools to latest version: cloudwatch-agent to v1.247357.0
+- Add logstash HPA and upgrade resources
 - Add init container for ArgoCD to create clusters for itself
 - Add ArgoCD Applications for each CDE via ApplicationSet
+- Remove LEGACY_LOGGING flag and logic
 - Add ArgoCD ApplicationSet support for multiple CDEs
-
 
 _Changes:_
 
@@ -50,6 +56,7 @@ _Changes:_
 - [X] PDO-4706 Update cluster tools to latest version: metrics-server v0.6.2
 - [X] PDO-4709 Update cluster tools to latest version: Grafana v9.3.6
 - [X] PDO-4713 Update cluster tools to latest version: prometheus to v2.42.0
+- [X] PDO-4714 Update cluster tools to latest version: newrelic-infrastructure
 - [X] PDO-4715 Update cluster tools to latest version: newrelic java agent to v8.0.1
 - [X] PDo-4716 Update cluster tools to latest version: cloudwatch-agent to v1.247357.0
 - [X] PDO-4765 Disable the CloudWatch Agent in development environments and development CDEs
@@ -65,17 +72,23 @@ _Changes:_
 - [X] PDO-4874 Automate creation of ping-cloud-dashboards new release branch
 - [X] PDO-4895 Added karpenter v0.24.0 and required parameters, KarpenterControllerRole & ClusterEndPoint
 - [X] PDO-4916 Missing PF request log
+- [X] PDO-4959 Update the PD backup job to create new PV at the start of the job and mount it
 - [X] PDO-4974 Change retry interval for PGO firing alert notification in slack from 5 min to 60 min
+- [X] PDO-4977 Update the PD restore job to create new PV at the start of the job and mount it
 - [X] PDO-4980 Index lifecycle error: illegal_argument_exception: policy [healthchecks] does not exist
 - [X] PDO-4981 Index templates are not applied to indexes in case elastic-stack-logging ns respinned
+- [X] PDO-4982 Update cluster tools to latest version: EFS Driver to v1.5.1
 - [X] PDO-4983 Index lifecycle error: illegal_argument_exception: policy [ping-2-day-retention] does not exist
 - [X] PDO-4986 Add PA-WAS in customer-hub
 - [X] PDO-4987 Add ArgoCD Bootstrap init container to create clusters
 - [X] PDO-4988 Add ArgoCD Applications for each CDE via ApplicationSet
 - [X] PDO-4989 Add ArgoCD ApplicationSet support for multiple CDEs
 - [X] PDO-4997 Update values.yaml in region and base path sync with env_vars file
+- [X] PDO-5009 Add logstash HPA and upgrade resources
 - [X] PDO-5037 Update to replace deprecated topologyKey to topology.kubernetes.io/zone 
-- [X] PDO-5039 Automate cleanup of external dns records for CI/CD clusters 
+- [X] PDO-5039 Automate cleanup of external dns records for CI/CD clusters
+- [X] PDO-5041 node-role.kubernetes.io/master (deprecated)
+- [X] PDO-5043 Legacy Logging Mode: Remove Feature Flag, Code Logic and Refactor Filters
 
 ### 1.17.0.0
 
