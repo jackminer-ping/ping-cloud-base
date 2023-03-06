@@ -70,7 +70,10 @@
 #                              | notifications                                      | ssm://pcpt/argocd/notification/slack/access_token
 #                              |                                                    |
 # ARGOCD_CDE_ROLE_SSM_TEMPLATE | SSM template path for the ArgoCD Chub -> CDE roles | The SSM template (to be rendered in python script) path:
-#                              | notifications                                      | '/argo-bootstrap-integration/pcpt/config/k8s-config/accounts/{env}/argo/role/arn'
+#                              |                                                    | '/pcpt/config/k8s-config/accounts/{env}/argo/role/arn'
+#                              |                                                    |
+# ARGOCD_CDE_URL_SSM_TEMPLATE  | SSM template path for the ArgoCD Chub -> CDE URLs  | The SSM template (to be rendered in python script) path:
+#                              |                                                    | '/pcpt/config/k8s-config/accounts/{env}/cluster/url'
 #                              |                                                    |
 # ARGOCD_BOOTSTRAP_ENABLED     | Feature flag to enabled/disable ArgoCD Chub -> CDE | The string "false"
 #                              | bootstrapping itself                               |
@@ -393,6 +396,7 @@ ${RADIUS_PROXY_ENABLED}
 ${IMAGE_TAG_PREFIX}
 ${ARGOCD_SLACK_TOKEN_BASE64}
 ${ARGOCD_CDE_ROLE_SSM_TEMPLATE}
+${ARGOCD_CDE_URL_SSM_TEMPLATE}
 ${ARGOCD_BOOTSTRAP_ENABLED}
 ${SLACK_CHANNEL}
 ${PROM_SLACK_CHANNEL}
@@ -415,6 +419,7 @@ ${KNOWN_HOSTS_CLUSTER_STATE_REPO}
 ${SSH_ID_KEY_BASE64}
 ${PGO_BACKUP_BUCKET_NAME}
 ${ARGOCD_CDE_ROLE_SSM_TEMPLATE}
+${ARGOCD_CDE_URL_SSM_TEMPLATE}
 ${ARGOCD_BOOTSTRAP_ENABLED}'
 
 ########################################################################################################################
@@ -649,6 +654,7 @@ echo "Initial RADIUS_PROXY_ENABLED: ${RADIUS_PROXY_ENABLED}"
 
 echo "Initial ARGOCD_BOOTSTRAP_ENABLED: ${ARGOCD_BOOTSTRAP_ENABLED}"
 echo "Initial ARGOCD_CDE_ROLE_SSM_TEMPLATE: ${ARGOCD_CDE_ROLE_SSM_TEMPLATE}"
+echo "Initial ARGOCD_CDE_URL_SSM_TEMPLATE: ${ARGOCD_CDE_URL_SSM_TEMPLATE}"
 
 echo "Initial TARGET_DIR: ${TARGET_DIR}"
 echo "Initial IS_BELUGA_ENV: ${IS_BELUGA_ENV}"
@@ -775,6 +781,7 @@ export ECR_REGISTRY_NAME='public.ecr.aws/r2h3l6e4'
 export PING_CLOUD_NAMESPACE='ping-cloud'
 export MYSQL_DATABASE='pingcentral'
 export ARGOCD_CDE_ROLE_SSM_TEMPLATE="${ARGOCD_CDE_ROLE_SSM_TEMPLATE:-'/pcpt/config/k8s-config/accounts/{env}/argo/role/arn'}"
+export ARGOCD_CDE_URL_SSM_TEMPLATE="${ARGOCD_CDE_URL_SSM_TEMPLATE:-'/pcpt/config/k8s-config/accounts/{env}/cluster/url'}"
 
 # Set Slack-related environment variables and override it's values depending on IS_GA value.
 get_is_ga_variable '/pcpt/stage/is-ga'
@@ -902,6 +909,7 @@ echo "Using IS_BELUGA_ENV: ${IS_BELUGA_ENV}"
 echo "Using ACCOUNT_BASE_PATH: ${ACCOUNT_BASE_PATH}"
 echo "Using PGO_BUCKET_URI_SUFFIX: ${PGO_BUCKET_URI_SUFFIX}"
 echo "Using ARGOCD_CDE_ROLE_SSM_TEMPLATE: ${ARGOCD_CDE_ROLE_SSM_TEMPLATE}"
+echo "Using ARGOCD_CDE_URL_SSM_TEMPLATE: ${ARGOCD_CDE_URL_SSM_TEMPLATE}"
 
 echo "Using IRSA_PING_ANNOTATION_KEY_VALUE: ${IRSA_PING_ANNOTATION_KEY_VALUE}"
 echo "Using IRSA_PA_ANNOTATION_KEY_VALUE: ${IRSA_PA_ANNOTATION_KEY_VALUE}"
