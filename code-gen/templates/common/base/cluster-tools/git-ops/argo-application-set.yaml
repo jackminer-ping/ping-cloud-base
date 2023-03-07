@@ -59,6 +59,10 @@ spec:
   syncPolicy:
     preserveResourcesOnDeletion: true
   generators:
+    # Matrix generator - enumerate all matching clusters, use metadata from each cluster to determine which branch
+    # and therefore environment to point to. Labels are added by the custom argocd-bootstrap script.
+    # Also enumerate all matching directories in the cluster-state-repo, creating an Application for each
+    # combination of cluster + application in the CSR
     - matrix:
         generators:
           - clusters:
