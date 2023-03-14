@@ -74,6 +74,7 @@ patchesJson6902:
       path: /spec/rules/4/host
       value: logs.${DNS_ZONE}
 
+    # TODO: probably need to modify
     # Argo CD pingaccess was runtime
     - op: replace
       path: /spec/tls/0/hosts/5
