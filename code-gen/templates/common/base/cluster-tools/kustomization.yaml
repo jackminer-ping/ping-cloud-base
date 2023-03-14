@@ -2,8 +2,7 @@ kind: Kustomization
 apiVersion: kustomize.config.k8s.io/v1beta1
 
 resources:
-# TODO: figure out how to handle this
-#- git-ops
+- git-ops
 - cert-manager
 - cluster-autoscaler
 - ebs-driver
