@@ -177,7 +177,7 @@ patchesStrategicMerge:
           - name: argocd-bootstrap
             # TODO: change back
             #image: public.ecr.aws/r2h3l6e4/pingcloud-services/argocd-bootstrap/dev:v1.18-release-branch-latest
-            image: 705370621539.dkr.ecr.us-west-2.amazonaws.com/pingcloud-services/argocd-bootstrap/dev:PDO-5141-fix-argo-name
+            image: 705370621539.dkr.ecr.us-west-2.amazonaws.com/pingcloud-services/argocd-bootstrap:PDO-5141-fix-argo-name
             imagePullPolicy: Always
             envFrom:
               - configMapRef:
