@@ -18,7 +18,7 @@ spec:
   template:
     metadata:
       # {{name}} is cluster name from the cluster generator above
-      name: "${TENANT_NAME}-${REGION_NICK_NAME}-{{name}}"
+      name: "${TENANT_NAME}-${REGION_NICK_NAME}-{{metadata.labels.argocd-env}}"
       namespace: argocd
       annotations:
         argocd-image-updater.argoproj.io/git-branch: "{{metadata.labels.argocd-branch}}"
@@ -81,7 +81,7 @@ spec:
   template:
     metadata:
       # {{name}} is cluster name from the cluster generator above
-      name: "${TENANT_NAME}-${REGION_NICK_NAME}-{{name}}-{{path.basename}}"
+      name: "${TENANT_NAME}-${REGION_NICK_NAME}-{{metadata.labels.argocd-env}}-{{path.basename}}"
       annotations:
         argocd-image-updater.argoproj.io/git-branch: "{{metadata.labels.argocd-branch}}"
         argocd-image-updater.argoproj.io/image-list: ${IMAGE_LIST}
