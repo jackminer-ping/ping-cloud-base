@@ -12,10 +12,12 @@ resources:
 # Deploy sealed-secrets controller so it's up and ready before ping-cloud namespace is created
 - ${K8S_GIT_URL}/k8s-configs/cluster-tools/base/security?ref=${K8S_GIT_BRANCH}
 
-# Copied by generate-cluster-state.sh from code-gen/templates/fluxcd/common/
+# generate-cluster-state.sh copies this from code-gen/templates/fluxcd/common/
+# The minimal bootstrap required for the ping-cloud stack
 - ping-cloud.yaml
 
-# Copied by generate-cluster-state.sh from code-gen/templates/customer-hub/base/cluster-tools/git-ops/
+# generate-cluster-state.sh copies this from code-gen/templates/customer-hub/base/cluster-tools/git-ops/
+# Create all argo applications
 - argo-application-set.yaml
 
 patchesStrategicMerge:
