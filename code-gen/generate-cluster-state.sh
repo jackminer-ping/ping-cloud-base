@@ -1139,16 +1139,14 @@ for ENV_OR_BRANCH in ${ENVIRONMENTS}; do
   # Massage files into correct structure for push-cluster-state script
   ######################################################################################################################
 
-  # Build the kustomization file for the bootstrap tools for each environment
   echo "Generating bootstrap yaml for ${ENV}"
-
-  # The code for an environment is generated under a directory of the same name as what's provided in ENVIRONMENTS.
   ENV_BOOTSTRAP_DIR="${BOOTSTRAP_DIR}/${ENV_OR_BRANCH}"
   mkdir -p "${ENV_BOOTSTRAP_DIR}"
-
-  cp "${TEMPLATES_HOME}/${BOOTSTRAP_SHORT_DIR}"/* "${ENV_BOOTSTRAP_DIR}"
-
-  # Create a list of variables to substitute for the bootstrap tools
+  if [[ "${ENV}" == "${CUSTOMER_HUB}" ]]; then
+    cp "${TEMPLATES_HOME}/${BOOTSTRAP_SHORT_DIR}"/customer-hub/* "${ENV_BOOTSTRAP_DIR}"
+  else
+    cp "${TEMPLATES_HOME}/${BOOTSTRAP_SHORT_DIR}"/cde/* "${ENV_BOOTSTRAP_DIR}"
+  fi
   substitute_vars "${ENV_BOOTSTRAP_DIR}" "${BOOTSTRAP_VARS}"
 
   # Copy the shared cluster tools and Ping yaml templates into their target directories
