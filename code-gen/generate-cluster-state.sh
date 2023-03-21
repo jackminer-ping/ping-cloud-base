@@ -1142,7 +1142,7 @@ for ENV_OR_BRANCH in ${ENVIRONMENTS}; do
   echo "Generating bootstrap yaml for ${ENV}"
   ENV_BOOTSTRAP_DIR="${BOOTSTRAP_DIR}/${ENV_OR_BRANCH}"
   mkdir -p "${ENV_BOOTSTRAP_DIR}"
-  if [[ "${ENV}" == "${CUSTOMER_HUB}" ]]; then
+  if [[ "${ENV}" == "${CUSTOMER_HUB}" || "${IS_BELUGA_ENV}" == "true" ]]; then
     cp "${TEMPLATES_HOME}/${BOOTSTRAP_SHORT_DIR}"/common/* "${ENV_BOOTSTRAP_DIR}"
     cp "${TEMPLATES_HOME}/${BOOTSTRAP_SHORT_DIR}"/customer-hub/* "${ENV_BOOTSTRAP_DIR}"
     cp "${CHUB_TEMPLATES_DIR}/base/cluster-tools/git-ops/argo-application-set.yaml" "${ENV_BOOTSTRAP_DIR}"
