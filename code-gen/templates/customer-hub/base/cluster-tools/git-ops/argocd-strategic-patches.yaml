@@ -12,7 +12,7 @@ spec:
       - name: argocd-application-controller
         env:
         - name: APP_RESYNC_SECONDS
-          value: "60"
+          value: "${APP_RESYNC_SECONDS}"
 ---
 ### Known hosts file for cloning the cluster state repo over SSH ###
 apiVersion: v1
