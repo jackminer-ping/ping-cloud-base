@@ -21,6 +21,7 @@ resources:
 - argocd-application-set.yaml
 
 patchesStrategicMerge:
+# generate-cluster-state.sh copies this from code-gen/templates/customer-hub/base/cluster-tools/git-ops/
 - argocd-strategic-patches.yaml
 
 ### Known hosts file for cloning the cluster state repo over SSH ###
@@ -54,4 +55,5 @@ patchesJson6902:
     kind: ConfigMap
     name: argocd-cm
     namespace: argocd
+  # generate-cluster-state.sh copies this from code-gen/templates/customer-hub/base/cluster-tools/git-ops/
   path: argocd-cm-patch.yaml
