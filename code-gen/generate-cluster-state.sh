@@ -420,7 +420,8 @@ ${SSH_ID_KEY_BASE64}
 ${PGO_BACKUP_BUCKET_NAME}
 ${ARGOCD_BOOTSTRAP_ENABLED}
 ${ARGOCD_CDE_ROLE_SSM_TEMPLATE}
-${ARGOCD_CDE_URL_SSM_TEMPLATE}'
+${ARGOCD_CDE_URL_SSM_TEMPLATE}
+${APP_RESYNC_SECONDS}'
 
 ########################################################################################################################
 # Export some derived environment variables.
@@ -674,6 +675,8 @@ echo "Initial CLUSTER_ENDPOINT: ${CLUSTER_ENDPOINT}"
 echo "Initial SLACK_CHANNEL: ${SLACK_CHANNEL}"
 echo "Initial NON_GA_SLACK_CHANNEL: ${NON_GA_SLACK_CHANNEL}"
 echo "Initial PROM_SLACK_CHANNEL: ${PROM_SLACK_CHANNEL}"
+
+echo "Initial APP_RESYNC_SECONDS: ${APP_RESYNC_SECONDS}"
 echo ---
 
 
@@ -858,6 +861,7 @@ export PA_MIN_YGEN=512m
 export PA_MAX_YGEN=512m
 export PA_GCOPTION='-XX:+UseParallelGC'
 
+export APP_RESYNC_SECONDS="${APP_RESYNC_SECONDS:-60}"
 
 ########################################################################################################################
 # Print out the final value being used for each variable.
@@ -926,6 +930,8 @@ echo "Using NLB_NGX_PUBLIC_ANNOTATION_KEY_VALUE: ${NLB_NGX_PUBLIC_ANNOTATION_KEY
 
 echo "Using SLACK_CHANNEL: ${SLACK_CHANNEL}"
 echo "Using PROM_SLACK_CHANNEL: ${PROM_SLACK_CHANNEL}"
+
+echo "Using APP_RESYNC_SECONDS: ${APP_RESYNC_SECONDS}"
 
 echo "Using USER_BASE_DN: ${USER_BASE_DN}"
 echo ---
@@ -1146,8 +1152,8 @@ for ENV_OR_BRANCH in ${ENVIRONMENTS}; do
   if [[ "${ENV}" == "${CUSTOMER_HUB}" || "${IS_BELUGA_ENV}" == "true" ]]; then
     cp "${TEMPLATES_HOME}/${BOOTSTRAP_SHORT_DIR}"/common/* "${ENV_BOOTSTRAP_DIR}"
     cp "${TEMPLATES_HOME}/${BOOTSTRAP_SHORT_DIR}"/customer-hub/* "${ENV_BOOTSTRAP_DIR}"
-    # Copy argo-application-set from customer-hub code-gen to prevent duplication of the yaml
-    cp "${CHUB_TEMPLATES_DIR}/base/cluster-tools/git-ops/argo-application-set.yaml" "${ENV_BOOTSTRAP_DIR}"
+    # Copy all files from customer-hub code-gen, except kustomization.yaml to re-use the yaml there and prevent duplication
+    find "${CHUB_TEMPLATES_DIR}/base/cluster-tools/git-ops" -type f -name "*.yaml" ! -name kustomization.yaml | xargs -I {} cp {} "${ENV_BOOTSTRAP_DIR}"
   else
     cp "${TEMPLATES_HOME}/${BOOTSTRAP_SHORT_DIR}"/common/* "${ENV_BOOTSTRAP_DIR}"
     cp "${TEMPLATES_HOME}/${BOOTSTRAP_SHORT_DIR}"/cde/* "${ENV_BOOTSTRAP_DIR}"
