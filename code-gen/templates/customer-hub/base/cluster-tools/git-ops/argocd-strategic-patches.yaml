@@ -84,8 +84,9 @@ metadata:
 ---
 apiVersion: v1
 kind: ConfigMap
-name: argocd-bootstrap
-namespace: argocd
+metadata:
+  name: argocd-bootstrap
+  namespace: argocd
 data:
   ARGOCD_BOOTSTRAP_ENABLED: "${ARGOCD_BOOTSTRAP_ENABLED}"
   ARGOCD_CDE_ROLE_SSM_TEMPLATE: "${ARGOCD_CDE_ROLE_SSM_TEMPLATE}"
