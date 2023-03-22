@@ -1139,18 +1139,21 @@ for ENV_OR_BRANCH in ${ENVIRONMENTS}; do
   # Massage files into correct structure for push-cluster-state script
   ######################################################################################################################
 
+  ####### Bootstrap logic ##############################################################################################
   echo "Generating bootstrap yaml for ${ENV}"
   ENV_BOOTSTRAP_DIR="${BOOTSTRAP_DIR}/${ENV_OR_BRANCH}"
   mkdir -p "${ENV_BOOTSTRAP_DIR}"
   if [[ "${ENV}" == "${CUSTOMER_HUB}" || "${IS_BELUGA_ENV}" == "true" ]]; then
     cp "${TEMPLATES_HOME}/${BOOTSTRAP_SHORT_DIR}"/common/* "${ENV_BOOTSTRAP_DIR}"
     cp "${TEMPLATES_HOME}/${BOOTSTRAP_SHORT_DIR}"/customer-hub/* "${ENV_BOOTSTRAP_DIR}"
+    # Copy argo-application-set from customer-hub code-gen to prevent duplication of the yaml
     cp "${CHUB_TEMPLATES_DIR}/base/cluster-tools/git-ops/argo-application-set.yaml" "${ENV_BOOTSTRAP_DIR}"
   else
     cp "${TEMPLATES_HOME}/${BOOTSTRAP_SHORT_DIR}"/common/* "${ENV_BOOTSTRAP_DIR}"
     cp "${TEMPLATES_HOME}/${BOOTSTRAP_SHORT_DIR}"/cde/* "${ENV_BOOTSTRAP_DIR}"
   fi
   substitute_vars "${ENV_BOOTSTRAP_DIR}" "${BOOTSTRAP_VARS}"
+  ####### END Bootstrap logic ##########################################################################################
 
   # Copy the shared cluster tools and Ping yaml templates into their target directories
   echo "Generating tools and ping yaml for ${ENV}"
