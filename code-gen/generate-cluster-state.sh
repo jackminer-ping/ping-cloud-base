@@ -1188,6 +1188,15 @@ for ENV_OR_BRANCH in ${ENVIRONMENTS}; do
 
   PRIMARY_PING_KUST_FILE="${K8S_CONFIGS_DIR}/${REGION_NICK_NAME}/kustomization.yaml"
 
+  # TODO: remove - enabling QA testing in CDEs
+  # Add ArgoCD to Beluga Environments since it normally runs only in customer-hub
+  cp -R "${CHUB_TEMPLATES_DIR}/base/cluster-tools/git-ops" "${K8S_CONFIGS_DIR}/base/cluster-tools/"
+
+  # Append the secrets from customer-hub to the CDE secrets, except PingCentral since that doesn't exist in the CDE
+  printf "\n# %%%% NOTE: Below secrets are for the Developer CDE only (when IS_BELUGA_ENV is 'true') to make sure Argo works properly %%%%#\n" >> "${K8S_CONFIGS_DIR}/base/secrets.yaml"
+  yq 'del(select(.metadata.name | contains("pingcentral")))' "${CHUB_TEMPLATES_DIR}/base/secrets.yaml" >> "${K8S_CONFIGS_DIR}/base/secrets.yaml"
+  printf "\n# %%%% END automatically appended secrets from generate-cluster-state.sh\n" >> "${K8S_CONFIGS_DIR}/base/secrets.yaml"
+
   # Copy around files for Developer CDE before substituting vars
   if "${IS_BELUGA_ENV}"; then
     # Add IS_BELUGA_ENV to the base env_vars
@@ -1198,15 +1207,6 @@ for ENV_OR_BRANCH in ${ENVIRONMENTS}; do
     # Update patches related to Beluga developer CDEs
     sed -i.bak 's/^# \(.*remove-from-developer-cde-patch.yaml\)$/\1/g' "${PRIMARY_PING_KUST_FILE}"
     rm -f "${PRIMARY_PING_KUST_FILE}.bak"
-
-    # Add ArgoCD to Beluga Environments since it normally runs only in customer-hub
-    echo "This is a Beluga Development Environment, copying ArgoCD into the CSR"
-    cp -R "${CHUB_TEMPLATES_DIR}/base/cluster-tools/git-ops" "${K8S_CONFIGS_DIR}/base/cluster-tools/"
-
-    # Append the secrets from customer-hub to the CDE secrets, except PingCentral since that doesn't exist in the CDE
-    printf "\n# %%%% NOTE: Below secrets are for the Developer CDE only (when IS_BELUGA_ENV is 'true') to make sure Argo works properly %%%%#\n" >> "${K8S_CONFIGS_DIR}/base/secrets.yaml"
-    yq 'del(select(.metadata.name | contains("pingcentral")))' "${CHUB_TEMPLATES_DIR}/base/secrets.yaml" >> "${K8S_CONFIGS_DIR}/base/secrets.yaml"
-    printf "\n# %%%% END automatically appended secrets from generate-cluster-state.sh\n" >> "${K8S_CONFIGS_DIR}/base/secrets.yaml"
   fi
 
   substitute_vars "${ENV_DIR}" "${REPO_VARS}" secrets.yaml env_vars values.yaml
