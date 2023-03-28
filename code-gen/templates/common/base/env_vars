@@ -92,9 +92,9 @@ SERVER_PROFILE_BRANCH=${SERVER_PROFILE_BRANCH_DERIVED}
 # Used by server profile hooks
 ENVIRONMENT_TYPE=${ENVIRONMENT_TYPE}
 
-# A space-delimited list of the environments a customer is paying for
-# This will lengthen or shorten should a customer add or remove environments
-ENVIRONMENTS="${ENVIRONMENTS}"
+# A space-delimited list of the environments we want ArgoCD to manage from customer-hub
+# This should be adjusted should a customer add or remove environments
+ARGOCD_ENVIRONMENTS="${ARGOCD_ENVIRONMENTS}"
 
 # Used by Kubernetes manifests
 ENV=${ENV}
