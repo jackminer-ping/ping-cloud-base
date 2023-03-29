@@ -1048,11 +1048,6 @@ for ENV in ${ENVIRONMENTS}; do # ENV loop
       TYPE='secondary'
     fi
 
-    if "${IS_CUSTOMER_HUB}" && ! "${IS_PRIMARY}"; then
-      log "Not pushing '${CUSTOMER_HUB}' branch for secondary region"
-      continue
-    fi
-
     TARGET_DIR="${TENANT_CODE_DIR}/${REGION_DIR}"
     log "Generated code directory for ${TYPE} region '${REGION_DIR}' and '${ENV}': ${TARGET_DIR}"
 
