@@ -799,9 +799,14 @@ export MYSQL_DATABASE='pingcentral'
 export ARGOCD_CDE_ROLE_SSM_TEMPLATE="${ARGOCD_CDE_ROLE_SSM_TEMPLATE:-'/pcpt/config/k8s-config/accounts/{env}/argo/role/arn'}"
 export ARGOCD_CDE_URL_SSM_TEMPLATE="${ARGOCD_CDE_URL_SSM_TEMPLATE:-'/pcpt/config/k8s-config/accounts/{env}/cluster/private-link/cname'}"
 
-
 ALL_ENVIRONMENTS='dev test stage prod customer-hub'
-export ARGOCD_ENVIRONMENTS="${ARGOCD_ENVIRONMENTS:-${ALL_ENVIRONMENTS}}"
+ENVIRONMENTS="${ENVIRONMENTS:-${ALL_ENVIRONMENTS}}"
+
+if ${UPGRADE}; then
+  export ARGOCD_ENVIRONMENTS="${ARGOCD_ENVIRONMENTS}"
+else
+  export ARGOCD_ENVIRONMENTS="${ENVIRONMENTS}"
+fi
 
 # Set Slack-related environment variables and override it's values depending on IS_GA value.
 get_is_ga_variable '/pcpt/stage/is-ga'
@@ -987,9 +992,6 @@ cp ../.gitignore "${CLUSTER_STATE_REPO_DIR}"
 cp ../.gitignore "${PROFILE_REPO_DIR}"
 
 echo "${PING_CLOUD_BASE_COMMIT_SHA}" > "${TARGET_DIR}/pcb-commit-sha.txt"
-
-# Now generate the yaml files for each environment
-ENVIRONMENTS="${ENVIRONMENTS:-${ALL_ENVIRONMENTS}}"
 
 # The ENVIRONMENTS variable can either be the CDE names (e.g. dev, test, stage, prod) or the CHUB name "customer-hub",
 # or the corresponding branch names (e.g. v1.8.0-dev, v1.8.0-test, v1.8.0-stage, v1.8.0-master, v1.8.0-customer-hub).
