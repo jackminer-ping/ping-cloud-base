@@ -270,6 +270,10 @@
 #                                  | name and must have the correct case (e.g. ci-cd    | for tenant domain "ci-cd.ping-oasis.com"
 #                                  | vs. CI-CD).                                        |
 #                                  |                                                    |
+#                                  |                                                    |
+# UPGRADE                          | Indicates generate-cluster-state.sh is running as  | The string "false"
+#                                  | an upgrade not an initial generation               |
+#                                  |                                                    |
 ######################################################################################################################################################
 
 #### SCRIPT START ####
@@ -802,7 +806,8 @@ export ARGOCD_CDE_URL_SSM_TEMPLATE="${ARGOCD_CDE_URL_SSM_TEMPLATE:-'/pcpt/config
 ALL_ENVIRONMENTS='dev test stage prod customer-hub'
 ENVIRONMENTS="${ENVIRONMENTS:-${ALL_ENVIRONMENTS}}"
 
-if ${UPGRADE}; then
+if [[ "${UPGRADE}" == "true" ]]; then
+  # We want to keep the original value of ARGOCD_ENVIRONMENTS from CSR generation, if this is an upgrade
   export ARGOCD_ENVIRONMENTS="${ARGOCD_ENVIRONMENTS}"
 else
   export ARGOCD_ENVIRONMENTS="${ENVIRONMENTS}"

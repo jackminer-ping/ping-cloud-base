@@ -925,7 +925,7 @@ for ENV in ${ENVIRONMENTS}; do # ENV loop
         # Also set the MYSQL_USER/PASSWORD to empty so they are fetched from AWS Secrets Manager going forward.
         set -x
         QUIET=true \
-            UPGRADE=true \
+            UPGRADE="true" \
             TARGET_DIR="${TARGET_DIR}" \
             SERVER_PROFILE_URL='' \
             K8S_GIT_URL="${PING_CLOUD_BASE_REPO_URL}" \
