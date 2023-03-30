@@ -70,7 +70,9 @@ RESET_TO_DEFAULT="${RESET_TO_DEFAULT:-false}"
 #     cat v1.7-k8s-files v1.8-k8s-files | sort -u                       # Create a union of the k8s files
 
 beluga_owned_k8s_files="@.flux.yaml \
-@argo-application.yaml \
+@argocd-application-set.yaml \
+@argocd-cm-patch.yaml \
+@argocd-strategic-patches.yaml \
 @custom-patches-sample.yaml \
 @env_vars \
 @flux-command.sh \
