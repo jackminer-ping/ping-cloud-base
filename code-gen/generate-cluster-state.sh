@@ -583,6 +583,8 @@ set_ssh_key_pair() {
 
 # Organizes the files from code-gen directory to a tmp directory for push-cluster-state script
 organize_code_for_csr() {
+  echo "Template home - check..."
+  ls "${TEMPLATES_HOME}"
   # find all the apps under code-gen/templates directory
   local app_paths=$(find "${TEMPLATES_HOME}" -type d -depth 1 ! -path '*/cde' ! -path '*/common' ! -path '*/customer-hub' ! -path '*/fluxcd')
 
