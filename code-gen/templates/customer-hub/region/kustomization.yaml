@@ -101,6 +101,7 @@ configMapGenerator:
 # ArgoCD
 # Merge global and regional env_vars
 - name: argocd-bootstrap
+  namespace: argocd
   behavior: merge
   envs:
     - ../base/cluster-tools/git-ops/env_vars
