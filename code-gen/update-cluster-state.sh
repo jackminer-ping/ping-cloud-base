@@ -926,6 +926,7 @@ for ENV in ${SUPPORTED_ENVIRONMENT_TYPES}; do # ENV loop
             SUPPORTED_ENVIRONMENT_TYPES="${NEW_BRANCH}" \
             PING_IDENTITY_DEVOPS_USER='' \
             PING_IDENTITY_DEVOPS_KEY='' \
+            MYSQL_SERVICE_HOST='' \
             MYSQL_USER='' \
             MYSQL_PASSWORD='' \
             PLATFORM_EVENT_QUEUE_NAME='' \
