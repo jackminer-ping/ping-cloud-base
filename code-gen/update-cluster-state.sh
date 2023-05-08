@@ -953,6 +953,7 @@ for ENV in ${SUPPORTED_ENVIRONMENT_TYPES}; do # ENV loop
       # Add some derived environment variables for substitution.
       add_derived_variables
 
+      set -x
       for TEMPLATE_ENV_VARS_FILE in ${ENV_VARS_FILES}; do # Loop through env_vars from ping-cloud-base/code-gen
 
         DIR_NAME="$(dirname "${TEMPLATE_ENV_VARS_FILE}")"
@@ -990,6 +991,8 @@ for ENV in ${SUPPORTED_ENVIRONMENT_TYPES}; do # ENV loop
         OLD_ENV_VARS_FILE="$(dirname "${TEMPLATE_ENV_VARS_FILE}")/${ENV_VARS_FILE_NAME}".old
         log "Backing up '${ORIG_ENV_VARS_FILE}' for region '${REGION_DIR}' and branch '${NEW_BRANCH}'"
         cp -f "${ORIG_ENV_VARS_FILE}" "${OLD_ENV_VARS_FILE}"
+
+        set +x
 
         # Substitute variables into new imported env_vars.
         tmp_file=$(mktemp)
