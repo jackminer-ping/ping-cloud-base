@@ -885,6 +885,7 @@ for ENV in ${SUPPORTED_ENVIRONMENT_TYPES}; do # ENV loop
       # base. This will ensure that derived variables are set correctly.
       set_env_vars "${REGION_ENV_VARS}"
       for ENV_VARS_FILE in ${APP_ENV_VARS_FILES}; do
+        echo "Setting env vars from... ${ENV_VARS_FILE}"
         set_env_vars "${ENV_VARS_FILE}"
       done
       set_env_vars "${BASE_ENV_VARS}"
