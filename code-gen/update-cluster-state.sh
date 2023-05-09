@@ -982,11 +982,11 @@ for ENV in ${SUPPORTED_ENVIRONMENT_TYPES}; do # ENV loop
           # Base git-ops file
           elif echo "${TEMPLATE_ENV_VARS_FILE}" | grep -q "${BASE_DIR}/git-ops"; then
             echo "-----> Git-ops base git-ops env_vars file matched ${TEMPLATE_ENV_VARS_FILE}"
-            ORIG_ENV_VARS_FILE="${K8S_CONFIGS_DIR}/${BASE_DIR}/${PARENT_DIR_NAME}/${DIR_NAME}/${ENV_VARS_FILE_NAME}"
+            ORIG_ENV_VARS_FILE="${K8S_CONFIGS_DIR}/${PARENT_DIR_NAME}/${DIR_NAME}/${ENV_VARS_FILE_NAME}"
           # Regional git-ops file
           elif echo "${TEMPLATE_ENV_VARS_FILE}" | grep -q "${REGION_DIR}/git-ops"; then
             echo "-----> Git-ops regional git-ops env_vars file matched ${TEMPLATE_ENV_VARS_FILE}"
-            ORIG_ENV_VARS_FILE="${K8S_CONFIGS_DIR}/${REGION_DIR}/${PARENT_DIR_NAME}/${DIR_NAME}/${ENV_VARS_FILE_NAME}"
+            ORIG_ENV_VARS_FILE="${K8S_CONFIGS_DIR}/${PARENT_DIR_NAME}/${DIR_NAME}/${ENV_VARS_FILE_NAME}"
           else
             log "Not an app-specific env_vars file: ${TEMPLATE_ENV_VARS_FILE}"
             # skip to next iteration.
