@@ -953,7 +953,6 @@ for ENV in ${SUPPORTED_ENVIRONMENT_TYPES}; do # ENV loop
       # Add some derived environment variables for substitution.
       add_derived_variables
 
-      set -x
       for TEMPLATE_ENV_VARS_FILE in ${ENV_VARS_FILES}; do # Loop through env_vars from ping-cloud-base/code-gen
 
         DIR_NAME="$(dirname "${TEMPLATE_ENV_VARS_FILE}")"
@@ -978,8 +977,14 @@ for ENV in ${SUPPORTED_ENVIRONMENT_TYPES}; do # ENV loop
              ORIG_ENV_VARS_FILE="${K8S_CONFIGS_DIR}/${REGION_DIR}/${DIR_NAME}/${ENV_VARS_FILE_NAME}"
           elif test "${DIR_NAME}" = 'admin' || test "${DIR_NAME}" = 'engine'; then
              ORIG_ENV_VARS_FILE="${K8S_CONFIGS_DIR}/${REGION_DIR}/${PARENT_DIR_NAME}/${DIR_NAME}/${ENV_VARS_FILE_NAME}"
-          elif test "${DIR_NAME}" = 'git-ops'; then
+          # Base git-ops file
+          elif echo "${TEMPLATE_ENV_VARS_FILE}" | grep -q "${BASE_DIR}/git-ops"; then
+            echo "-----> Git-ops base git-ops env_vars file matched ${TEMPLATE_ENV_VARS_FILE}"
             ORIG_ENV_VARS_FILE="${K8S_CONFIGS_DIR}/${BASE_DIR}/${PARENT_DIR_NAME}/${DIR_NAME}/${ENV_VARS_FILE_NAME}"
+          # Regional git-ops file
+          elif echo "${TEMPLATE_ENV_VARS_FILE}" | grep -q "${REGION_DIR}/git-ops"; then
+            echo "-----> Git-ops regional git-ops env_vars file matched ${TEMPLATE_ENV_VARS_FILE}"
+            ORIG_ENV_VARS_FILE="${K8S_CONFIGS_DIR}/${REGION_DIR}/${PARENT_DIR_NAME}/${DIR_NAME}/${ENV_VARS_FILE_NAME}"
           else
             log "Not an app-specific env_vars file: ${TEMPLATE_ENV_VARS_FILE}"
             # skip to next iteration.
@@ -991,8 +996,6 @@ for ENV in ${SUPPORTED_ENVIRONMENT_TYPES}; do # ENV loop
         OLD_ENV_VARS_FILE="$(dirname "${TEMPLATE_ENV_VARS_FILE}")/${ENV_VARS_FILE_NAME}".old
         log "Backing up '${ORIG_ENV_VARS_FILE}' for region '${REGION_DIR}' and branch '${NEW_BRANCH}'"
         cp -f "${ORIG_ENV_VARS_FILE}" "${OLD_ENV_VARS_FILE}"
-
-        set +x
 
         # Substitute variables into new imported env_vars.
         tmp_file=$(mktemp)
