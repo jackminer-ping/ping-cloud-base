@@ -961,6 +961,8 @@ for ENV in ${SUPPORTED_ENVIRONMENT_TYPES}; do # ENV loop
         DIR_NAME="${DIR_NAME##*/}"
         PARENT_DIR_NAME="${PARENT_DIR_NAME##*/}"
 
+
+        set -x
         if test "${DIR_NAME}" = "${BASE_DIR}"; then
           # Capture original env_var for primary or customer-hub region only.
           if "${IS_PRIMARY}" = "true" || "${IS_CUSTOMER_HUB}" = "true"; then
@@ -997,6 +999,7 @@ for ENV in ${SUPPORTED_ENVIRONMENT_TYPES}; do # ENV loop
         log "Backing up '${ORIG_ENV_VARS_FILE}' for region '${REGION_DIR}' and branch '${NEW_BRANCH}'"
         cp -f "${ORIG_ENV_VARS_FILE}" "${OLD_ENV_VARS_FILE}"
 
+        set +x
         # Substitute variables into new imported env_vars.
         tmp_file=$(mktemp)
         envsubst "${ENV_VARS_TO_SUBST}" < "${TEMPLATE_ENV_VARS_FILE}" > "${tmp_file}"
