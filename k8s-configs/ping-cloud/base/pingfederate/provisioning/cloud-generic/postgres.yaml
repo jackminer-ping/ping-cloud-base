@@ -5,7 +5,8 @@ kind: PostgresCluster
 metadata:
   name: pf-provisioning
 spec:
-  image: registry.developers.crunchydata.com/crunchydata/crunchy-postgres:ubi8-14.7-0
+  #image: registry.developers.crunchydata.com/crunchydata/crunchy-postgres:ubi8-14.7-0
+  image: public.ecr.aws/r2h3l6e4/pingcloud-clustertools/crunchydata/crunchy-postgres:ubi8-14.7-0
   # We can choose a Postgres version independently from PGO (so long as it's supported)
   # Here we keep the version at 14 so existing customers aren't doing a major version upgrade in addition to PGO upgrade
   postgresVersion: 14
@@ -51,7 +52,8 @@ spec:
       options: "SUPERUSER"
   backups:
     pgbackrest:
-      image: registry.developers.crunchydata.com/crunchydata/crunchy-pgbackrest:ubi8-2.41-4
+      #image: registry.developers.crunchydata.com/crunchydata/crunchy-pgbackrest:ubi8-2.41-4
+      image: public.ecr.aws/r2h3l6e4/pingcloud-clustertools/crunchydata/crunchy-pgbackrest:ubi8-2.41-4
       global:
         repo1-path: /pingfederate/provisioning
         # Allow storage solution to handle retention (retain max from PGO perspective)
@@ -74,4 +76,5 @@ spec:
   monitoring:
     pgmonitor:
       exporter:
-        image: registry.developers.crunchydata.com/crunchydata/crunchy-postgres-exporter:ubi8-5.3.1-0
+        #image: registry.developers.crunchydata.com/crunchydata/crunchy-postgres-exporter:ubi8-5.3.1-0
+        image: public.ecr.aws/r2h3l6e4/pingcloud-clustertools/crunchydata/crunchy-postgres-exporter:ubi8-5.3.1-0
