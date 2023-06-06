@@ -86,6 +86,7 @@
 - Upgrade Postgres Operator (PGO) to 5.3.1 to support EKS v1.25
 - Add PGO Backups Jobs TTL
 - Add region env vars to cluster-health-environment-variables configmap
+- During the upgrade EXTERNAL_INGRESS_ENABLED env var value is changed (quotes removed)
 
 _Changes:_
 
@@ -198,6 +199,7 @@ _Changes:_
 - [X] PDO-5460 Update kubectl to 1.24.0 for EKS 1.25
 - [X] PDO-5474 upgrade Postgres Operator (PGO) to 5.3.1 to support EKS v1.25
 - [X] PDO-5525 Add PGO Backups Jobs TTL
+- [X] PDO-5554 During the upgrade EXTERNAL_INGRESS_ENABLED env var value is changed (quotes removed)
 
 ### 1.17.0.0
 
