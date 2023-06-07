@@ -107,7 +107,7 @@ feature_flags() {
 # Comments the remove external ingress patch for ping apps from k8s-configs kustomization.yaml files.
 # Hence the apps which are part of list in EXTERNAL_INGRESS_ENABLED will have external ingress enabled.
 ########################################################################################################################
-enable_external_ingress() {  
+enable_external_ingress() {
   cd "${TMP_DIR}"
   for apps in ${EXTERNAL_INGRESS_ENABLED}; do
     search_term="${apps}[/].*remove-external-ingress"
