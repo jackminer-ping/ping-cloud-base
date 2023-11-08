@@ -211,7 +211,8 @@ for ENV_OR_BRANCH in ${SUPPORTED_ENVIRONMENT_TYPES}; do
         # isolation - if the Versent process fails in the secondary region while still in isolation, keeping the files
         # pulled from the secondary CSR from the previous branch (master) can lead to unexpected behavior for non-master
         # branches
-        git rm -rf .
+        echo "Attempting to delete contents of previous branch before orphan branch was created..."
+        git rm -rf . || echo "Previous git branch was already empty"
       fi
     fi
   fi
