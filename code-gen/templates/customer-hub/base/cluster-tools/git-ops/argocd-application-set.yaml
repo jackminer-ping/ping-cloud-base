@@ -35,9 +35,15 @@ spec:
           kind: Job
           jsonPointers:
             - /spec/ttlSecondsAfterFinished
+        - group: autoscaling
+          kind: HorizontalPodAutoscaler
+          jsonPointers:
+            - /status
       syncPolicy:
         automated:
           prune: true
+        syncOptions:
+          - RespectIgnoreDifferences=true
       destination:
         server: "{{server}}"
       project: default
