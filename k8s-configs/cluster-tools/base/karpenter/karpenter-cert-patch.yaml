@@ -1,4 +1,3 @@
-# Source: karpenter/templates/secret-webhook-cert.yaml
 apiVersion: v1
 kind: Secret
 metadata:
