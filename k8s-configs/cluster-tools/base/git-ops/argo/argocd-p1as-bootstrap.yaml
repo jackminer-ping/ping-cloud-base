@@ -8,6 +8,10 @@ metadata:
     role: argocd-p1as-bootstrap
 spec:
   template:
+    metadata:
+      labels:
+        # We create this job once, but we want the pod deleted long-term and not the job resource to prevent Argo drift
+        pod-reaper: enabled
     spec:
       serviceAccountName: argocd-server
       containers:
