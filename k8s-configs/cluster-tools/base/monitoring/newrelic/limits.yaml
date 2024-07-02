@@ -12,10 +12,10 @@ spec:
         resources:
           requests:
             cpu: 10m
-            memory: 29Mi
+            memory: 30Mi
       - name: kubelet
         resources:
           requests:
             cpu: 25m
-            memory: 107Mi
+            memory: 105Mi
 ---
