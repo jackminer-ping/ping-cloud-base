@@ -45,3 +45,19 @@ patches:
     - op: add
       path: /metadata/annotations/nginx.ingress.kubernetes.io~1enable-annotation-validation
       value: "true"
+
+- target:
+    kind: Deployment
+    name: ingress-nginx-controller
+  patch: |-
+    - op: replace
+      path: /spec/template/spec/containers/0/resources
+      value:
+          limits:
+            cpu: 2
+            memory: 4Gi
+          # Tuned based on kubecost perf testing
+          # TODO: tune other nginx params specific to nginx to make the pods smaller
+          requests:
+            cpu: 200
+            memory: 500Mi

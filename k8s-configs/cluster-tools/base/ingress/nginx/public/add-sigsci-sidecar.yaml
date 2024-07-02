@@ -30,9 +30,10 @@
       limits:
         cpu: 2
         memory: 2Gi
+      # Perf testing with kubecost determined these numbers
       requests:
-        cpu: 2
-        memory: 2Gi
+        cpu: 1800
+        memory: 512Mi
     env:
     - name: AWS_REGION
       value: us-east-2

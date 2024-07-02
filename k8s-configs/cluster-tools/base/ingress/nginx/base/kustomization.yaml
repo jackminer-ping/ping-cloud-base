@@ -221,9 +221,11 @@ patches:
           limits:
             cpu: 2
             memory: 4Gi
+          # Tuned based on kubecost perf testing
+          # TODO: Tune private nginx separately per recommendations?
           requests:
-            cpu: 2
-            memory: 4Gi
+            cpu: 500
+            memory: 2400Mi
     
     # Added securityContext
     - op: add
