@@ -111,9 +111,10 @@ spec:
             limits:
               cpu:  200m
               memory: 200Mi
+            # Based on kubecost testing
             requests:
-              cpu: 200m
-              memory: 200Mi
+              cpu: 10m
+              memory: 80Mi
           # Please don't change below envs
           env:
             - name: HOST_IP

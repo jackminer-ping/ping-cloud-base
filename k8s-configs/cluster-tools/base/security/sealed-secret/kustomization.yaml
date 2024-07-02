@@ -21,9 +21,10 @@ patches:
           limits:
             cpu: 500m
             memory: 100Mi
+          # Changes per kubecost
           requests:
-            cpu: 500m
-            memory: 100Mi
+            cpu: 10m
+            memory: 20Mi
 
       # turning off key renewal
       - op: add
