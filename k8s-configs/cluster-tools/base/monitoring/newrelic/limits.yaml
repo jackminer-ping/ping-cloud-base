@@ -1,0 +1,21 @@
+apiVersion: apps/v1
+kind: DaemonSet
+metadata:
+  namespace: newrelic
+  name: nri-bundle-nrk8s-kubelet
+spec:
+  template:
+    spec:
+      containers:
+      # Based on kubecost testing
+      - name: agent
+        resources:
+          requests:
+            cpu: 10m
+            memory: 29Mi
+      - name: kubelet
+        resources:
+          requests:
+            cpu: 25m
+            memory: 107Mi
+---
