@@ -32,7 +32,7 @@
         memory: 2Gi
       # Perf testing with kubecost determined these numbers
       requests:
-        cpu: 1800
+        cpu: 1800m
         memory: 512Mi
     env:
     - name: AWS_REGION

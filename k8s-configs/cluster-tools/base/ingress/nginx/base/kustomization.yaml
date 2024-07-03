@@ -224,7 +224,7 @@ patches:
           # Tuned based on kubecost perf testing
           # TODO: Tune private nginx separately per recommendations?
           requests:
-            cpu: 500
+            cpu: 500m
             memory: 2400Mi
     
     # Added securityContext
