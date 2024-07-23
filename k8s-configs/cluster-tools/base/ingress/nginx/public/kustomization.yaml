@@ -11,11 +11,20 @@ resources:
 
 namespace: ingress-nginx-public
 
-commonLabels:
-  app.kubernetes.io/component: controller
-  app.kubernetes.io/name: ingress-nginx
-  app.kubernetes.io/part-of: ingress-nginx
-  app.kubernetes.io/role: ingress-nginx-public
+labels:
+  # Replace all labels as our OOTB nginx base includes labels app.kubernetes.io/instance which is also used by ArgoCD
+  - pairs:
+      app.kubernetes.io/role: ingress-nginx-public
+      app.kubernetes.io/component: controller
+      app.kubernetes.io/name: ingress-nginx
+      app.kubernetes.io/part-of: ingress-nginx
+    includeTemplates: true
+    includeSelectors: true
+  # Do NOT add the version label to selectors - selectors are typically immutable and lead to upgrade challenges and downtime
+  - pairs:
+      app.kubernetes.io/version: 1.9.6
+    includeTemplates: true
+    includeSelectors: false
 
 configMapGenerator:
 - name: ingress-bootstrap-environment-variables
