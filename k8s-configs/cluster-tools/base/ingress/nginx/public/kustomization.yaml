@@ -12,7 +12,7 @@ resources:
 namespace: ingress-nginx-public
 
 labels:
-  # Replace all labels as our OOTB nginx base includes labels app.kubernetes.io/instance which is also used by ArgoCD
+  # Replace all labels as our OOTB nginx base includes labels like app.kubernetes.io/instance which is also used by ArgoCD
   - pairs:
       app.kubernetes.io/role: ingress-nginx-public
       app.kubernetes.io/component: controller
