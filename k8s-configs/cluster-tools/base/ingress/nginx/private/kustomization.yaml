@@ -17,6 +17,7 @@ labels:
       app.kubernetes.io/component: controller
       app.kubernetes.io/name: ingress-nginx
       app.kubernetes.io/part-of: ingress-nginx
+      app: ingress-nginx
     includeTemplates: true
     includeSelectors: true
   # Do NOT add the version label to selectors - selectors are typically immutable and lead to upgrade challenges and downtime
