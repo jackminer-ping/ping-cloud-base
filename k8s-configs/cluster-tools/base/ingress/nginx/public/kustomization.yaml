@@ -95,3 +95,13 @@ patches:
     - op: add
       path: /metadata/annotations/nginx.ingress.kubernetes.io~1enable-annotation-validation
       value: "true"
+
+- patch: |-
+    - op: remove
+      path: /spec/selector/app.kubernetes.io~1version
+  target:
+    version: v1
+    kind: Service
+    name: ingress-nginx
+    namespace: ingress-nginx-public
+
