@@ -417,13 +417,13 @@ configMapGenerator:
     # Adding ConfigMaps to P1AS needs
   - name: nginx-configuration
     behavior: create
-    options:
+    Options:
       disableNameSuffixHash: true
   - name: tcp-services
     behavior: create
-    options:
+    Options:
       disableNameSuffixHash: true
   - name: udp-services
     behavior: create
-    options:
+    Options:
       disableNameSuffixHash: true
