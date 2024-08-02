@@ -121,4 +121,4 @@ patches:
           app.kubernetes.io/component: controller
           app.kubernetes.io/name: ingress-nginx
           app.kubernetes.io/part-of: ingress-nginx
-          app.kubernetes.io/role: ingress-nginx-private
+          app.kubernetes.io/role: ingress-nginx-public
