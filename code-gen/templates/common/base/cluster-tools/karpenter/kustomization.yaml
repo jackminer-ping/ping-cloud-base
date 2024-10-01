@@ -26,8 +26,6 @@ patchesStrategicMerge:
               value: "${CLUSTER_ENDPOINT}"
             - name: DISABLE_WEBHOOK
               value: "false"
-            - name: FEATURE_GATES
-              value: "Drift=true"
             - name: INTERRUPTION_QUEUE
               value: "interruption-${CLUSTER_NAME}"
 - |-
