@@ -149,6 +149,44 @@ feature_flags() {
 }
 
 ########################################################################################################################
+# Take a target file and feature flag, and add the feature flag to the components of that file, adding a components
+# section if necessary
+#
+# Arguments
+#   $1 -> the kustomization.yaml file to add the 'components:' to
+#   $2 -> the feature flag variable with "true" or "false" for enabled
+#   $3 -> the Kustomize Component path
+########################################################################################################################
+feature_flag_component() {
+    target_file=${1}
+    # must export env var so `yq` can use it
+    enabled=${2}
+    export feature_flag=${2}
+
+    if [[ "${enabled}" != "true" ]]; then
+      log "feature flag '${feature_flag}' is not enabled"
+      return
+    fi
+
+    log "Checking '${target_file}' for feature flag '${feature_flag}'..."
+    # Check if components section is null, if so, add to it
+    components=$(yq '.components' "${target_file}")
+    if [[ "${components}" == "null" ]]; then
+        log "There is no components section in '${target_file}', adding components section and feature flag '${feature_flag}'"
+        yq -i '.components += [env(feature_flag)]' ${target_file}
+    else
+        # If not null, check if the feature flag is already in the list, if not then add it
+        feature_already_in_list=$(yq '.components | any_c(. == env(feature_flag))' ${target_file})
+        if [[ "${feature_already_in_list}" == "false" ]]; then
+            log "Feature flag '${feature_flag}' not in components, adding it"
+            yq -i '.components += [env(feature_flag)]' ${target_file}
+        else
+            log "Feature flag '${feature_flag}' already in components, NOT adding it"
+        fi
+    fi
+}
+
+########################################################################################################################
 # Comments the remove external ingress patch for ping apps from k8s-configs kustomization.yaml files.
 # Hence the apps which are part of list in EXTERNAL_INGRESS_ENABLED will have external ingress enabled.
 ########################################################################################################################
@@ -328,6 +366,7 @@ if test -f 'env_vars'; then
       rm -f "${kust_file}".bak
     done
 
+    feature_flag_component "${TMP_DIR}/base/cluster_tools/kustomization.yaml" "${KARPENTER_ENABLED}" "ff-karpenter"
     feature_flags "${TMP_DIR}/${K8S_GIT_BRANCH}"
     enable_external_ingress
   )

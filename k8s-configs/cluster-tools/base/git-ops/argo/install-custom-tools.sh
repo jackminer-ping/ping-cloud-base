@@ -13,7 +13,7 @@ chmod a+x /tools/git-remote-codecommit
 
 ### envsubst and wget ###
 apt-get update
-apt-get -y install gettext-base wget
+apt-get -y install gettext-base wget yq
 apt-get clean
 rm -rf /var/lib/apt/lists/*
 cp /usr/bin/envsubst /tools
