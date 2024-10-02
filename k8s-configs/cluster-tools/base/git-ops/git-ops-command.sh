@@ -366,7 +366,7 @@ if test -f 'env_vars'; then
       rm -f "${kust_file}".bak
     done
 
-    feature_flag_component "${TMP_DIR}/base/cluster_tools/kustomization.yaml" "${KARPENTER_ENABLED}" "karpenter"
+    feature_flag_component "${TMP_DIR}/base/cluster-tools/kustomization.yaml" "${KARPENTER_ENABLED}" "karpenter"
     feature_flags "${TMP_DIR}/${K8S_GIT_BRANCH}"
     enable_external_ingress
   )
