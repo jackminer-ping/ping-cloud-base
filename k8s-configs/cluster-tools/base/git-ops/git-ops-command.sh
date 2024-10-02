@@ -161,7 +161,7 @@ feature_flag_component() {
     target_file=${1}
     # must export env var so `yq` can use it
     enabled=${2}
-    export feature_flag=${2}
+    export feature_flag=${3}
 
     if [[ "${enabled}" != "true" ]]; then
       log "feature flag '${feature_flag}' is not enabled"
@@ -366,7 +366,7 @@ if test -f 'env_vars'; then
       rm -f "${kust_file}".bak
     done
 
-    feature_flag_component "${TMP_DIR}/base/cluster_tools/kustomization.yaml" "${KARPENTER_ENABLED}" "ff-karpenter"
+    feature_flag_component "${TMP_DIR}/base/cluster_tools/kustomization.yaml" "${KARPENTER_ENABLED}" "karpenter"
     feature_flags "${TMP_DIR}/${K8S_GIT_BRANCH}"
     enable_external_ingress
   )
