@@ -4,6 +4,36 @@ apiVersion: kustomize.config.k8s.io/v1beta1
 resources:
   - cert-manager.yaml
 
+# labels:
+#   # cert-manager includes 'app.kubernetes.io/instance' by default as of v1.16.1, so we must override all labels ourselves
+#   # Remove some labels from selectors to ease upgrades
+#   - pairs:
+#       app: cert-manager
+#       app.kubernetes.io/name: cert-manager
+#       app.kubernetes.io/component: "controller"
+#       app.kubernetes.io/version: "v1.16.1"
+#     includeTemplates: true
+#     includeSelectors: true
+#   # Do NOT add the these labels to selectors - selectors changes on Deployments are immutable and lead to upgrade challenges
+#   # and downtime
+#   - pairs:
+#       app.kubernetes.io/version: "v1.16.1"
+#     includeTemplates: true
+#     includeSelectors: false
+
+# transformers:
+#   - |-
+#     apiVersion: builtin
+#     kind: LabelTransformer
+#     metadata:
+#       name: remove-labels
+#     labels: {}
+#     fieldSpecs:
+#       - path: metadata/labels
+#         create: false
+#       - path: spec/template/metadata/labels
+#         create: false
+
 patches:
   # Add tolerations to all deployments so cert-manager launches immediately on core nodes
   # Patches are done here so that the bootstrap manifest also contains these patches
