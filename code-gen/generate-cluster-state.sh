@@ -821,6 +821,12 @@ export PRIMARY_TENANT_DOMAIN="${PRIMARY_TENANT_DOMAIN_NO_DOT_SUFFIX:-${TENANT_DO
 export SECONDARY_TENANT_DOMAINS="${SECONDARY_TENANT_DOMAINS}"
 export STAGE="${STAGE:-lab}"
 
+# # Default stage to lab-us1
+# STAGE="${STAGE:-lab-us1}"
+
+# # Versent passes STAGE as "stage-region" (e.g. "ga-us1") so we need to strip the region suffix
+# export STAGE="${STAGE%%-*}"
+
 if "${IS_BELUGA_ENV}"; then
   DERIVED_GLOBAL_TENANT_DOMAIN="global.${TENANT_DOMAIN_NO_DOT_SUFFIX}"
 else

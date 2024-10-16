@@ -8,5 +8,6 @@ labels:
     region: ${REGION_NICK_NAME}
     env: ${ENV}
     customer: ${TENANT_NAME}
-    stage: ${STAGE}
+    # Grab only stage portion (e.g. "ga") - prefix before first hyphen
+    stage: ${STAGE%%-*}
 enterprise: true
