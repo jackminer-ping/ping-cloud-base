@@ -19,6 +19,7 @@ rm -rf /var/lib/apt/lists/*
 cp /usr/bin/envsubst /tools
 
 ### Install specific Kustomize version ###
+# NOTE: Version actually starts with a 'v' but in S3 we previously ommitted this
 KUSTOMIZE_VERSION=5.5.0
 
 if [ "`uname -m`" = "aarch64" ] ; then
