@@ -225,9 +225,8 @@ on_terminate() {
 trap on_terminate SIGTERM
 
 # Check for correct kustomize version
-KUSTOMIZE_VERSION="v5.5.0"
-# Check for correct kustomize version
-KUSTOMIZE_VERSION="v5.5.0"
+# Kustomize version returned contains 'v' prefix, so we ignore that for consistency sake across references to version
+KUSTOMIZE_VERSION="5.5.0"
 if ! kustomize version | grep -q "${KUSTOMIZE_VERSION}"; then
   log "Error: Kustomize version must be ${KUSTOMIZE_VERSION}"
   exit 1
