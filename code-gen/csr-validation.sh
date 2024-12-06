@@ -76,7 +76,10 @@ NO_COLOR="\033[0m"
 
 # Check for correct kustomize version
 KUSTOMIZE_VERSION="v5.5.0"
-kustomize version | grep -q "${KUSTOMIZE_VERSION}" || (echo "Error: Kustomize version must be ${KUSTOMIZE_VERSION}" && exit 1)
+if ! kustomize version | grep -q "${KUSTOMIZE_VERSION}"; then
+  echo "Error: Kustomize version must be ${KUSTOMIZE_VERSION}"
+  exit 1
+fi
 
 # delete any "charts" directories that exist from previous runs to force helm to pull new charts
 cleanup_charts

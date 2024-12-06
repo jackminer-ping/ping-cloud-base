@@ -226,7 +226,12 @@ trap on_terminate SIGTERM
 
 # Check for correct kustomize version
 KUSTOMIZE_VERSION="v5.5.0"
-kustomize version | grep -q "${KUSTOMIZE_VERSION}" || (log "Error: Kustomize version must be ${KUSTOMIZE_VERSION}" && exit 1)
+# Check for correct kustomize version
+KUSTOMIZE_VERSION="v5.5.0"
+if ! kustomize version | grep -q "${KUSTOMIZE_VERSION}"; then
+  log "Error: Kustomize version must be ${KUSTOMIZE_VERSION}"
+  exit 1
+fi
 
 TARGET_DIR="${1:-.}"
 cd "${TARGET_DIR}" >/dev/null 2>&1
