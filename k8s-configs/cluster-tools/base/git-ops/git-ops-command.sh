@@ -185,19 +185,6 @@ disable_os_operator_crds() {
     done
 }
 
-
-########################################################################################################################
-# Format the provided kustomize version for numeric comparison. For example, if the kustomize version is 4.0.5, it
-# returns 004000005000.
-#
-# Arguments
-#   ${1} -> The kustomize short version, e.g. v4.0.5.
-########################################################################################################################
-format_version() {
-  version="$1"
-  printf "%03d%03d%03d%03d" $(echo "${version}" | tr '.' ' ')
-}
-
 ########################################################################################################################
 # Clean up on exit. If non-zero exit, then print the log file to stdout before deleting it. Change back to the previous
 # directory. Delete the kustomize build directory, if it exists.
