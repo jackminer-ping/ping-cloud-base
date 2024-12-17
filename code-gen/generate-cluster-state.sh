@@ -989,7 +989,8 @@ if test ! "${KNOWN_HOSTS_CLUSTER_STATE_REPO}"; then
   else
     SSH_HOST_KEY_TYPE='rsa'
   fi
-  KNOWN_HOSTS_CLUSTER_STATE_REPO="$(ssh-keyscan -t "${SSH_HOST_KEY_TYPE}" -H "${URL_HOST}" 2>/dev/null)"
+  # TODO: works for macOS, but need to confirm it doesn't break new customer launch on Versent image...
+  KNOWN_HOSTS_CLUSTER_STATE_REPO="$(ssh-keyscan -q -t "${SSH_HOST_KEY_TYPE}" -H "${URL_HOST}" 2>/dev/null)"
 fi
 export KNOWN_HOSTS_CLUSTER_STATE_REPO
 
