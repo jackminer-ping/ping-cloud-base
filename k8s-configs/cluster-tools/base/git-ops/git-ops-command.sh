@@ -211,128 +211,160 @@ on_terminate() {
 
 trap on_terminate SIGTERM
 
-# Check for correct kustomize version
-# Kustomize version returned contains 'v' prefix, so we ignore that for consistency sake across references to version
-KUSTOMIZE_VERSION="5.5.0"
-if ! kustomize version | grep -q "${KUSTOMIZE_VERSION}"; then
-  log "Error: Kustomize version must be ${KUSTOMIZE_VERSION}"
-  exit 1
-fi
+monorepo_main() {
 
-TARGET_DIR="${1:-.}"
-cd "${TARGET_DIR}" >/dev/null 2>&1
+  # Check for correct kustomize version
+  # Kustomize version returned contains 'v' prefix, so we ignore that for consistency sake across references to version
+  KUSTOMIZE_VERSION="5.5.0"
+  if ! kustomize version | grep -q "${KUSTOMIZE_VERSION}"; then
+    log "Error: Kustomize version must be ${KUSTOMIZE_VERSION}"
+    exit 1
+  fi
 
-if [[ $(lowercase "${DEBUG}") != "true" ]]; then
-  # Trap all exit codes from here on so cleanup is run
-  trap "cleanup" EXIT
-fi
+  TARGET_DIR="${1:-.}"
+  cd "${TARGET_DIR}" >/dev/null 2>&1
 
-# Get short and full directory names of the target directory
-TARGET_DIR_FULL="$(pwd)"
-TARGET_DIR_SHORT="$(basename "${TARGET_DIR_FULL}")"
+  if [[ $(lowercase "${DEBUG}") != "true" ]]; then
+    # Trap all exit codes from here on so cleanup is run
+    trap "cleanup" EXIT
+  fi
 
-# Directory paths relative to TARGET_DIR
-BASE_DIR='../base'
+  # Get short and full directory names of the target directory
+  TARGET_DIR_FULL="$(pwd)"
+  TARGET_DIR_SHORT="$(basename "${TARGET_DIR_FULL}")"
 
-# Perform substitution and build in a temporary directory
-if [[ $(lowercase "${DEBUG}") == "true" ]]; then
-  TMP_DIR="/tmp/git-ops-scratch-space"
-  rm -rf "${TMP_DIR}"
-  mkdir -p "${TMP_DIR}"
-else
-  TMP_DIR="$(mktemp -d)"
-fi
-BUILD_DIR="${TMP_DIR}/${TARGET_DIR_SHORT}"
+  # Directory paths relative to TARGET_DIR
+  BASE_DIR='../base'
 
-# Copy contents of target directory into temporary directory
-log "copying '${TARGET_DIR_FULL}' templates into '${TMP_DIR}'"
-cp -pr "${TARGET_DIR_FULL}" "${TMP_DIR}"
+  # Perform substitution and build in a temporary directory
+  if [[ $(lowercase "${DEBUG}") == "true" ]]; then
+    TMP_DIR="/tmp/git-ops-scratch-space"
+    rm -rf "${TMP_DIR}"
+    mkdir -p "${TMP_DIR}"
+  else
+    TMP_DIR="$(mktemp -d)"
+  fi
+  BUILD_DIR="${TMP_DIR}/${TARGET_DIR_SHORT}"
 
-if test -d "${BASE_DIR}"; then
-  log "copying '${BASE_DIR}' templates into '${TMP_DIR}'" && \
-  cp -pr "${BASE_DIR}" "${TMP_DIR}"
-fi
+  # Copy contents of target directory into temporary directory
+  log "copying '${TARGET_DIR_FULL}' templates into '${TMP_DIR}'"
+  cp -pr "${TARGET_DIR_FULL}" "${TMP_DIR}"
 
-# If there's an environment file, then perform substitution
-if test -f 'env_vars'; then
-  # Perform the substitutions in a sub-shell so it doesn't pollute the current shell.
-  log "substituting env_vars into templates"
-  (
-    cd "${BUILD_DIR}"
+  if test -d "${BASE_DIR}"; then
+    log "copying '${BASE_DIR}' templates into '${TMP_DIR}'" && \
+    cp -pr "${BASE_DIR}" "${TMP_DIR}"
+  fi
 
-    BASE_ENV_VARS="${BASE_DIR}"/env_vars
-    env_vars_file=env_vars
+  # If there's an environment file, then perform substitution
+  if test -f 'env_vars'; then
+    # Perform the substitutions in a sub-shell so it doesn't pollute the current shell.
+    log "substituting env_vars into templates"
+    (
+      cd "${BUILD_DIR}"
 
-    if test -f "${BASE_ENV_VARS}"; then
-      env_vars_file="$(mktemp)"
-      awk 1 env_vars "${BASE_ENV_VARS}" > "${env_vars_file}"
-      substitute_vars "${env_vars_file}" "${BASE_DIR}"
-    fi
+      BASE_ENV_VARS="${BASE_DIR}"/env_vars
+      env_vars_file=env_vars
 
-    substitute_vars "${env_vars_file}" .
-
-    PCB_TMP="${TMP_DIR}/${K8S_GIT_BRANCH}"
-
-    # Try to copy a local repo to improve testing flow
-    if [[ $(lowercase "${LOCAL}") == "true" ]]; then
-      if [[ -z "${PCB_PATH}" ]]; then
-        log "ERROR: running in local mode, please provide a PCB_PATH. Exiting."
-        exit 1
+      if test -f "${BASE_ENV_VARS}"; then
+        env_vars_file="$(mktemp)"
+        awk 1 env_vars "${BASE_ENV_VARS}" > "${env_vars_file}"
+        substitute_vars "${env_vars_file}" "${BASE_DIR}"
       fi
-      log "using PCB set by PCB_PATH: ${PCB_PATH}"
-      cp -pr "${PCB_PATH}" "${PCB_TMP}"
-    # Clone git branch from the upstream repo
-    else
-      log "cloning git branch '${K8S_GIT_BRANCH}' from: ${K8S_GIT_URL}"
-      git clone -c advice.detachedHead=false -q --depth=1 -b "${K8S_GIT_BRANCH}" --single-branch "${K8S_GIT_URL}" "${PCB_TMP}"
-    fi
 
-    log "replacing remote repo URL '${K8S_GIT_URL}' with locally cloned repo at ${PCB_TMP}"
-    kust_files="$(find "${TMP_DIR}" -name kustomization.yaml | grep -wv "${K8S_GIT_BRANCH}")"
+      substitute_vars "${env_vars_file}" .
 
-    for kust_file in ${kust_files}; do
-      rel_resource_dir="$(relative_path "$(dirname "${kust_file}")" "${PCB_TMP}")"
-      log "replacing ${K8S_GIT_URL} in file ${kust_file} with ${rel_resource_dir}"
-      # Replace K8S_GIT_URL with rel_resource_dir and remove git branch reference,
-      # but skip these operations for lines containing "ping-cloud-dashboards"
-      sed -i.bak '
-      /ping-cloud-dashboards/!{
-          s|'"${K8S_GIT_URL}"'|'"${rel_resource_dir}"'|g
-          s|\?ref='"${K8S_GIT_BRANCH}"'$||g
-      }
-      ' "${kust_file}"
-      rm -f "${kust_file}".bak
-    done
+      PCB_TMP="${TMP_DIR}/${K8S_GIT_BRANCH}"
 
-    feature_flags "${TMP_DIR}/${K8S_GIT_BRANCH}"
-    enable_external_ingress
-  )
-  test $? -ne 0 && exit 1
-fi
+      # Try to copy a local repo to improve testing flow
+      if [[ $(lowercase "${LOCAL}") == "true" ]]; then
+        if [[ -z "${PCB_PATH}" ]]; then
+          log "ERROR: running in local mode, please provide a PCB_PATH. Exiting."
+          exit 1
+        fi
+        log "using PCB set by PCB_PATH: ${PCB_PATH}"
+        cp -pr "${PCB_PATH}" "${PCB_TMP}"
+      # Clone git branch from the upstream repo
+      else
+        log "cloning git branch '${K8S_GIT_BRANCH}' from: ${K8S_GIT_URL}"
+        git clone -c advice.detachedHead=false -q --depth=1 -b "${K8S_GIT_BRANCH}" --single-branch "${K8S_GIT_URL}" "${PCB_TMP}"
+      fi
 
-if ! command -v argocd &> /dev/null ; then
-  disable_grafana_crds
-  disable_os_operator_crds
-fi
+      log "replacing remote repo URL '${K8S_GIT_URL}' with locally cloned repo at ${PCB_TMP}"
+      kust_files="$(find "${TMP_DIR}" -name kustomization.yaml | grep -wv "${K8S_GIT_BRANCH}")"
 
-# Build the uber deploy yaml
-if [[ $(lowercase "${DEBUG}") == "true" ]]; then
-  log "DEBUG - generating uber yaml file from '${BUILD_DIR}' to /tmp/uber-debug.yaml"
-  kustomize build --load-restrictor LoadRestrictionsNone "${BUILD_DIR}" --output /tmp/uber-debug.yaml
-# Output the yaml to stdout for Argo when operating normally
-elif test -z "${OUT_DIR}" || test ! -d "${OUT_DIR}"; then
-  log "generating uber yaml file from '${BUILD_DIR}' to stdout"
-  kustomize build --load-restrictor LoadRestrictionsNone "${BUILD_DIR}" &
-  kustomize_pid=$!
-  # Wait for the process ID of the Kustomize build to forward the corresponding return code to Argo CD.
-  wait $kustomize_pid
-  exit $?
+      for kust_file in ${kust_files}; do
+        rel_resource_dir="$(relative_path "$(dirname "${kust_file}")" "${PCB_TMP}")"
+        log "replacing ${K8S_GIT_URL} in file ${kust_file} with ${rel_resource_dir}"
+        # Replace K8S_GIT_URL with rel_resource_dir and remove git branch reference,
+        # but skip these operations for lines containing "ping-cloud-dashboards"
+        sed -i.bak '
+        /ping-cloud-dashboards/!{
+            s|'"${K8S_GIT_URL}"'|'"${rel_resource_dir}"'|g
+            s|\?ref='"${K8S_GIT_BRANCH}"'$||g
+        }
+        ' "${kust_file}"
+        rm -f "${kust_file}".bak
+      done
 
-# TODO: leave this functionality for now - it outputs many yaml files to the OUT_DIR
-# it isn't clear if this is still used in actual CDEs
+      feature_flags "${TMP_DIR}/${K8S_GIT_BRANCH}"
+      enable_external_ingress
+    )
+    test $? -ne 0 && exit 1
+  fi
+
+  if ! command -v argocd &> /dev/null ; then
+    disable_grafana_crds
+    disable_os_operator_crds
+  fi
+
+  # Build the uber deploy yaml
+  if [[ $(lowercase "${DEBUG}") == "true" ]]; then
+    log "DEBUG - generating uber yaml file from '${BUILD_DIR}' to /tmp/uber-debug.yaml"
+    kustomize build --load-restrictor LoadRestrictionsNone "${BUILD_DIR}" --output /tmp/uber-debug.yaml
+  # Output the yaml to stdout for Argo when operating normally
+  elif test -z "${OUT_DIR}" || test ! -d "${OUT_DIR}"; then
+    log "generating uber yaml file from '${BUILD_DIR}' to stdout"
+    kustomize build --load-restrictor LoadRestrictionsNone "${BUILD_DIR}" &
+    kustomize_pid=$!
+    # Wait for the process ID of the Kustomize build to forward the corresponding return code to Argo CD.
+    wait $kustomize_pid
+    exit $?
+
+  # TODO: leave this functionality for now - it outputs many yaml files to the OUT_DIR
+  # it isn't clear if this is still used in actual CDEs
+  else
+    log "generating yaml files from '${BUILD_DIR}' to '${OUT_DIR}'"
+    kustomize build --load-restrictor LoadRestrictionsNone "${BUILD_DIR}" --output "${OUT_DIR}"
+  fi
+
+  exit 0
+}
+
+
+# This method is designed to work ONLY from ArgoCD. If you want to run it directly, manually, you must make sure you are
+# already in a MICROSERVICE/REGION directory before running. You must also have the helm-command.sh file in the same path
+microservice_main() {
+  # Get version from relative path to MICROSERVICE/REGION directory we start in from ArgoCD
+  version=$(cat ../../version.txt)
+  log "P1AS version is: ${version}" > /tmp/microservice-command-debug.log
+
+  # P1AS version 2.0.* and earlier require Kustomize version 5.0.3 which also requires a custom helm command to properly
+  # Use OCI registries - see https://github.com/kubernetes-sigs/kustomize/issues/4381
+  if [[ "${version}" =~ ^v((1\.18)|(1\.19)|(2\.0)).* ]]; then
+    log "Using Kustomize version 5.0.3" >> /tmp/microservice-command-debug.log
+    kustomize_5_0_3 build --load-restrictor LoadRestrictionsNone --enable-helm --helm-command helm-command.sh
+  else
+    log "Using latest kustomize" >> /tmp/microservice-command-debug.log
+    kustomize build --load-restrictor LoadRestrictionsNone --enable-helm
+  fi
+}
+
+# If the current working directory contains k8s-deploy, then we assume we are building the monorepo
+# We cannot check for args because ArgoCD works this way
+if echo "${PWD}" | grep -q "k8s-configs"; then
+  log "Current working directory is ${PWD} which contains k8s-configs, so building this as if it is the monorepo"
+  monorepo_main "$@"
 else
-  log "generating yaml files from '${BUILD_DIR}' to '${OUT_DIR}'"
-  kustomize build --load-restrictor LoadRestrictionsNone "${BUILD_DIR}" --output "${OUT_DIR}"
+  log "Current working directory is ${PWD} which does NOT contain k8s-configs, so building this as a microservice"
+  microservice_main
 fi
-
-exit 0
