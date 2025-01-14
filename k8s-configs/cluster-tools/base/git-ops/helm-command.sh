@@ -1,7 +1,5 @@
 #!/bin/bash
 
-echo "Got args: $@" >> /tmp/jack-helm.txt
-
 if [[ $@ = pull* && $@ = *oci://* ]]; then
   if [[ $@ = *--repo* ]]; then
     # If the command is `helm pull (..)` skips --repo flag and chartName
@@ -10,20 +8,19 @@ if [[ $@ = pull* && $@ = *oci://* ]]; then
     # For explanation:
     # https://github.com/kubernetes-sigs/kustomize/issues/4381
 
-    #echo "args 1: $@" >> /tmp/jack-args.txt
-    # remove everything up until --repo
     arr=(${@//--repo/});  # Skipping --repo
-    #echo "args 2: ${arr}" >> /tmp/jack-args.txt
-    # get elements 0 through 5, and end to 6, removing all else
     args="${arr[@]:0:5} ${arr[@]:6}";  # Skipping chartName
-    #echo "args 3: ${args}" >> /tmp/jack-args.txt
+  # If --repo is not in the command, then it's running a newer Kustomize version which needs to handle the --repo flag
   else
-    # Remove from the end of the string up until the first /
-    # This removes the duplicate repo name
-    args="$@"
-    echo "args 1: ${args}" >> /tmp/jack-new-args.txt
-    args[4]="${args[4]%\/*}"
-    echo "args 2: ${args}" >> /tmp/jack-new-args.txt
+    # Set args as an array to modify array properly
+    args=( "$@" )
+    # Remove the second p1as-* repo name from the repo name, if it exists - this is the duplicate repo name
+    if [[ ${args[4]} =~ (.*)(p1as-.*)(\/p1as-.*) ]]; then
+      args[4]="${BASH_REMATCH[1]}${BASH_REMATCH[2]}"
+    fi
+    # Back to a string space-separated array for use with cmd string later on
+    args="${args[@]}"
+    echo "Args after removing duplicate repo: $args" >> /tmp/helm-debug
   fi
 else
     args="$@"
