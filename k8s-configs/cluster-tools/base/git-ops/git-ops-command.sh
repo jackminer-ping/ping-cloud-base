@@ -185,6 +185,18 @@ disable_os_operator_crds() {
     done
 }
 
+get_version() {
+  local version_file_path=""
+  # Use TARGET_DIR to get full path of version file in case git-ops-command is not running within the cluster-state-repo
+  version_file_path="$(git -C ${TARGET_DIR} rev-parse --show-toplevel)/version.txt"
+  cat "${version_file_path}"
+}
+
+set_kustomize_version {
+
+
+}
+
 ########################################################################################################################
 # Clean up on exit. If non-zero exit, then print the log file to stdout before deleting it. Change back to the previous
 # directory. Delete the kustomize build directory, if it exists.
@@ -235,6 +247,11 @@ monorepo_main() {
 
   # Directory paths relative to TARGET_DIR
   BASE_DIR='../base'
+
+  P1AS_VERSION=$(get_version)
+  log "P1AS version is: ${P1AS_VERSION}"
+
+  KUSTOMIZE_EXECUTABLE=$(set_kustomize_version)
 
   # Perform substitution and build in a temporary directory
   if [[ $(lowercase "${DEBUG}") == "true" ]]; then
@@ -346,15 +363,16 @@ monorepo_main() {
 microservice_main() {
   # Get version from relative path to MICROSERVICE/REGION directory we start in from ArgoCD
   version=$(cat ../../version.txt)
-  log "P1AS version is: ${version}" > /tmp/microservice-command-debug.log
+  log "P1AS version is: ${version}"
 
   # P1AS version 2.0.* and earlier require Kustomize version 5.0.3 which also requires a custom helm command to properly
   # Use OCI registries - see https://github.com/kubernetes-sigs/kustomize/issues/4381
-  if [[ "${version}" =~ ^v((1\.18)|(1\.19)|(2\.0)).* ]]; then
-    log "Using Kustomize version 5.0.3" >> /tmp/microservice-command-debug.log
+  if [[ "${version}" =~ ^v((1\.*)|(2\.0)).* ]]; then
+    log "Using Kustomize version 5.0.3"
     kustomize_5_0_3 build --load-restrictor LoadRestrictionsNone --enable-helm --helm-command helm-command.sh
   else
-    log "Using latest kustomize" >> /tmp/microservice-command-debug.log
+    log "Using latest kustomize"
+    # TODO: decide if using the helm command still to maintain backwards compatibility, keep the dev cluster working properly...
     kustomize build --load-restrictor LoadRestrictionsNone --enable-helm
   fi
 }
@@ -362,9 +380,13 @@ microservice_main() {
 # If the current working directory contains k8s-deploy, then we assume we are building the monorepo
 # We cannot check for args because ArgoCD works this way
 if echo "${PWD}" | grep -q "k8s-configs"; then
+  version_path="../../version.txt"
+  get_version "${version_path}"
   log "Current working directory is ${PWD} which contains k8s-configs, so building this as if it is the monorepo"
   monorepo_main "$@"
 else
+  version_path="../version.txt"
+  get_version "${version_path}"
   log "Current working directory is ${PWD} which does NOT contain k8s-configs, so building this as a microservice"
   microservice_main
 fi
