@@ -192,10 +192,10 @@ get_version() {
   cat "${version_file_path}"
 }
 
-set_kustomize_version {
+set_kustomize_version() {
   # P1AS version 2.0.* and earlier require Kustomize version 5.0.3 which also requires a custom helm command to properly
   # Use OCI registries - see https://github.com/kubernetes-sigs/kustomize/issues/4381
-  if [[ "${version}" =~ ^v((1\.*)|(2\.0)).* ]]; then
+  if [[ "${P1AS_VERSION}" =~ ^v((1\.*)|(2\.0)).* ]]; then
     KUSTOMIZE_EXECUTABLE="kustomize_5_0_3"
   else
     KUSTOMIZE_EXECUTABLE="kustomize"
@@ -236,9 +236,6 @@ monorepo_main() {
   #   log "Error: Kustomize version must be ${KUSTOMIZE_VERSION}"
   #   exit 1
   # fi
-
-  TARGET_DIR="${1:-.}"
-  cd "${TARGET_DIR}" >/dev/null 2>&1
 
   if [[ $(lowercase "${DEBUG}") != "true" ]]; then
     # Trap all exit codes from here on so cleanup is run
@@ -359,16 +356,21 @@ monorepo_main() {
 # This function is designed to work ONLY from ArgoCD. If you want to run it directly, manually, you must make sure you are
 # already in a MICROSERVICE/REGION directory before running. You must also have the helm-command.sh file in the same path
 microservice_main() {
-  exec $KUSTOMIZE_EXECUTABLE build --load-restrictor LoadRestrictionsNone --enable-helm --helm-command helm-command.sh
+  set -x
+  eval "${KUSTOMIZE_EXECUTABLE} build --load-restrictor LoadRestrictionsNone --enable-helm --helm-command helm-command.sh"
+  set +x
 }
 
 # If the current working directory contains k8s-deploy, then we assume we are building the monorepo
 # We cannot check for args $1 because ArgoCD works without passing in a path and assumes it's building the current
 # directory - see $TARGET_DIR's default value
 main () {
+  TARGET_DIR="${1:-.}"
+  cd "${TARGET_DIR}" >/dev/null 2>&1
+
   P1AS_VERSION=$(get_version)
   log "P1AS version is: ${P1AS_VERSION}"
-  KUSTOMIZE_EXECUTABLE=$(set_kustomize_version)
+  set_kustomize_version
 
   # If our current path contains k8s-configs, then we are building the monorepo
   if echo "${PWD}" | grep -q "k8s-configs"; then
@@ -380,3 +382,5 @@ main () {
     microservice_main
   fi
 }
+
+main "$@"
