@@ -188,7 +188,7 @@ disable_os_operator_crds() {
 get_version() {
   local version_file_path=""
   # Use TARGET_DIR to get full path of version file in case git-ops-command is not running within the cluster-state-repo
-  version_file_path="$(git -C ${TARGET_DIR} rev-parse --show-toplevel)/version.txt"
+  version_file_path="$(git rev-parse --show-toplevel)/version.txt"
   cat "${version_file_path}"
 }
 
@@ -333,11 +333,11 @@ monorepo_main() {
   # Build the uber deploy yaml
   if [[ $(lowercase "${DEBUG}") == "true" ]]; then
     log "DEBUG - generating uber yaml file from '${BUILD_DIR}' to /tmp/uber-debug.yaml"
-    kustomize build --load-restrictor LoadRestrictionsNone "${BUILD_DIR}" --output /tmp/uber-debug.yaml
+    eval "${KUSTOMIZE_EXECUTABLE} build --load-restrictor LoadRestrictionsNone "${BUILD_DIR}" --output /tmp/uber-debug.yaml"
   # Output the yaml to stdout for Argo when operating normally
   elif test -z "${OUT_DIR}" || test ! -d "${OUT_DIR}"; then
     log "generating uber yaml file from '${BUILD_DIR}' to stdout"
-    kustomize build --load-restrictor LoadRestrictionsNone "${BUILD_DIR}" &
+    eval "${KUSTOMIZE_EXECUTABLE}  --load-restrictor LoadRestrictionsNone ${BUILD_DIR} &"
     kustomize_pid=$!
     # Wait for the process ID of the Kustomize build to forward the corresponding return code to Argo CD.
     wait $kustomize_pid
@@ -347,18 +347,17 @@ monorepo_main() {
   # it isn't clear if this is still used in actual CDEs
   else
     log "generating yaml files from '${BUILD_DIR}' to '${OUT_DIR}'"
-    kustomize build --load-restrictor LoadRestrictionsNone "${BUILD_DIR}" --output "${OUT_DIR}"
+    eval "${KUSTOMIZE_EXECUTABLE} kustomize build --load-restrictor LoadRestrictionsNone ${BUILD_DIR} --output ${OUT_DIR}"
   fi
 
   exit 0
 }
 
 # This function is designed to work ONLY from ArgoCD. If you want to run it directly, manually, you must make sure you are
-# already in a MICROSERVICE/REGION directory before running. You must also have the helm-command.sh file in the same path
+# already in a MICROSERVICE/REGION directory before running.
+# You must also have the helm-command.sh file in your $PATH
 microservice_main() {
-  set -x
   eval "${KUSTOMIZE_EXECUTABLE} build --load-restrictor LoadRestrictionsNone --enable-helm --helm-command helm-command.sh"
-  set +x
 }
 
 # If the current working directory contains k8s-deploy, then we assume we are building the monorepo
