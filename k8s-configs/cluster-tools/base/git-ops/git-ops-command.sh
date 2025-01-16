@@ -337,7 +337,7 @@ monorepo_main() {
   # Output the yaml to stdout for Argo when operating normally
   elif test -z "${OUT_DIR}" || test ! -d "${OUT_DIR}"; then
     log "generating uber yaml file from '${BUILD_DIR}' to stdout"
-    eval "${KUSTOMIZE_EXECUTABLE}  --load-restrictor LoadRestrictionsNone ${BUILD_DIR} &"
+    eval "${KUSTOMIZE_EXECUTABLE} build --load-restrictor LoadRestrictionsNone ${BUILD_DIR} &"
     kustomize_pid=$!
     # Wait for the process ID of the Kustomize build to forward the corresponding return code to Argo CD.
     wait $kustomize_pid
@@ -347,7 +347,7 @@ monorepo_main() {
   # it isn't clear if this is still used in actual CDEs
   else
     log "generating yaml files from '${BUILD_DIR}' to '${OUT_DIR}'"
-    eval "${KUSTOMIZE_EXECUTABLE} kustomize build --load-restrictor LoadRestrictionsNone ${BUILD_DIR} --output ${OUT_DIR}"
+    eval "${KUSTOMIZE_EXECUTABLE} build --load-restrictor LoadRestrictionsNone ${BUILD_DIR} --output ${OUT_DIR}"
   fi
 
   exit 0
