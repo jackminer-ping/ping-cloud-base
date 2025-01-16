@@ -193,8 +193,13 @@ get_version() {
 }
 
 set_kustomize_version {
-
-
+  # P1AS version 2.0.* and earlier require Kustomize version 5.0.3 which also requires a custom helm command to properly
+  # Use OCI registries - see https://github.com/kubernetes-sigs/kustomize/issues/4381
+  if [[ "${version}" =~ ^v((1\.*)|(2\.0)).* ]]; then
+    KUSTOMIZE_EXECUTABLE="kustomize_5_0_3"
+  else
+    KUSTOMIZE_EXECUTABLE="kustomize"
+  fi
 }
 
 ########################################################################################################################
@@ -224,14 +229,13 @@ on_terminate() {
 trap on_terminate SIGTERM
 
 monorepo_main() {
-
-  # Check for correct kustomize version
-  # Kustomize version returned contains 'v' prefix, so we ignore that for consistency sake across references to version
-  KUSTOMIZE_VERSION="5.5.0"
-  if ! kustomize version | grep -q "${KUSTOMIZE_VERSION}"; then
-    log "Error: Kustomize version must be ${KUSTOMIZE_VERSION}"
-    exit 1
-  fi
+  # # Check for correct kustomize version
+  # # Kustomize version returned contains 'v' prefix, so we ignore that for consistency sake across references to version
+  # KUSTOMIZE_VERSION="5.5.0"
+  # if ! kustomize version | grep -q "${KUSTOMIZE_VERSION}"; then
+  #   log "Error: Kustomize version must be ${KUSTOMIZE_VERSION}"
+  #   exit 1
+  # fi
 
   TARGET_DIR="${1:-.}"
   cd "${TARGET_DIR}" >/dev/null 2>&1
@@ -247,11 +251,6 @@ monorepo_main() {
 
   # Directory paths relative to TARGET_DIR
   BASE_DIR='../base'
-
-  P1AS_VERSION=$(get_version)
-  log "P1AS version is: ${P1AS_VERSION}"
-
-  KUSTOMIZE_EXECUTABLE=$(set_kustomize_version)
 
   # Perform substitution and build in a temporary directory
   if [[ $(lowercase "${DEBUG}") == "true" ]]; then
@@ -357,36 +356,27 @@ monorepo_main() {
   exit 0
 }
 
-
-# This method is designed to work ONLY from ArgoCD. If you want to run it directly, manually, you must make sure you are
+# This function is designed to work ONLY from ArgoCD. If you want to run it directly, manually, you must make sure you are
 # already in a MICROSERVICE/REGION directory before running. You must also have the helm-command.sh file in the same path
 microservice_main() {
-  # Get version from relative path to MICROSERVICE/REGION directory we start in from ArgoCD
-  version=$(cat ../../version.txt)
-  log "P1AS version is: ${version}"
-
-  # P1AS version 2.0.* and earlier require Kustomize version 5.0.3 which also requires a custom helm command to properly
-  # Use OCI registries - see https://github.com/kubernetes-sigs/kustomize/issues/4381
-  if [[ "${version}" =~ ^v((1\.*)|(2\.0)).* ]]; then
-    log "Using Kustomize version 5.0.3"
-    kustomize_5_0_3 build --load-restrictor LoadRestrictionsNone --enable-helm --helm-command helm-command.sh
-  else
-    log "Using latest kustomize"
-    # TODO: decide if using the helm command still to maintain backwards compatibility, keep the dev cluster working properly...
-    kustomize build --load-restrictor LoadRestrictionsNone --enable-helm
-  fi
+  exec $KUSTOMIZE_EXECUTABLE build --load-restrictor LoadRestrictionsNone --enable-helm --helm-command helm-command.sh
 }
 
 # If the current working directory contains k8s-deploy, then we assume we are building the monorepo
-# We cannot check for args because ArgoCD works this way
-if echo "${PWD}" | grep -q "k8s-configs"; then
-  version_path="../../version.txt"
-  get_version "${version_path}"
-  log "Current working directory is ${PWD} which contains k8s-configs, so building this as if it is the monorepo"
-  monorepo_main "$@"
-else
-  version_path="../version.txt"
-  get_version "${version_path}"
-  log "Current working directory is ${PWD} which does NOT contain k8s-configs, so building this as a microservice"
-  microservice_main
-fi
+# We cannot check for args $1 because ArgoCD works without passing in a path and assumes it's building the current
+# directory - see $TARGET_DIR's default value
+main () {
+  P1AS_VERSION=$(get_version)
+  log "P1AS version is: ${P1AS_VERSION}"
+  KUSTOMIZE_EXECUTABLE=$(set_kustomize_version)
+
+  # If our current path contains k8s-configs, then we are building the monorepo
+  if echo "${PWD}" | grep -q "k8s-configs"; then
+    log "Current working directory is ${PWD} which contains k8s-configs, so building this as if it is the monorepo"
+    monorepo_main "$@"
+  # Otherwise, we are building a microservice
+  else
+    log "Current working directory is ${PWD} which does NOT contain k8s-configs, so building this as a microservice"
+    microservice_main
+  fi
+}
