@@ -19,18 +19,6 @@ if [[ $@ = pull* && $@ = *oci://* ]]; then
     arr=(${@//--repo/});  # Skipping --repo
     args="${arr[@]:0:5} ${arr[@]:6}";  # Skipping chartName
     echo "Args after removing --repo: $args" >> /tmp/helm-debug
-  # If --repo is not in the command, then it's running a newer Kustomize version which needs to handle the --repo flag
-  else
-    # Set args as an array to modify array properly
-    args=( "$@" )
-    # Remove the second p1as-* repo name from the repo name, if it exists - this is the duplicate repo name
-    if [[ ${args[4]} =~ (.*)(p1as-.*)(\/p1as-.*) ]]; then
-      args[4]="${BASH_REMATCH[1]}${BASH_REMATCH[2]}"
-    fi
-    # Back to a string space-separated array for use with cmd string later on
-    args="${args[@]}"
-    echo "Args after removing duplicate repo: $args" >> /tmp/helm-debug
-  fi
 else
     args="$@"
 fi
