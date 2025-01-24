@@ -177,9 +177,9 @@ patches:
                 memory: "500Mi"
                 cpu: "500m"
               # The ArgoCD server gets hit especially hard by requests from the UI, this will hopefully be fixed by
-              # https://github.com/argoproj/argo-cd/issues/14947 in 2.10 (2.10 RC is already out),
+              # https://github.com/argoproj/argo-cd/issues/14947 in future Argocd releases,
               # https://github.com/argoproj/argo-cd/issues/15509 is another related ticket
-              # We have PDO-6569 to upgrade ArgoCD to 2.10+ in order to take advantage once these issues are solved
+              # We have PDO-6569 to upgrade ArgoCD to 2.13+ in order to take advantage once these issues are solved
               limits:
                 cpu: "1000m"
 - patch: |-
@@ -231,7 +231,7 @@ patches:
           ignoreDifferences: |
             jsonPointers:
             - /webhooks/0/clientConfig/caBundle
-      kustomize.buildOptions: --load-restrictor LoadRestrictionsNone --enable-helm
+      kustomize.buildOptions: --load-restrictor LoadRestrictionsNone --enable-helm --helm-command /usr/local/bin/helm-command.sh
 - patch: |-
       # Mount Beluga-specific scripts within the container
       apiVersion: apps/v1
@@ -247,6 +247,9 @@ patches:
               - name: git-ops-command
                 mountPath: /usr/local/bin/git-ops-command.sh
                 subPath: git-ops-command.sh
+              - name: helm-command
+                mountPath: /usr/local/bin/helm-command.sh
+                subPath: helm-command.sh
               - name: tools-dir
                 mountPath: /usr/local/bin/envsubst
                 subPath: envsubst
@@ -272,7 +275,7 @@ patches:
           - name: git-ops-command
             command: [/var/run/argocd/argocd-cmp-server] # Entrypoint should be Argo CD lightweight CMP server i.e. argocd-cmp-server
             # We don't need to use the full ArgoCD image here but we use it for consistency sake when installing all of the tools for both containers.
-            image: public.ecr.aws/r2h3l6e4/pingcloud-clustertools/argo/argocd:v2.8.3
+            image: public.ecr.aws/r2h3l6e4/pingcloud-clustertools/argo/argocd:v2.12.4
             securityContext:
               runAsNonRoot: true
               runAsUser: 999
@@ -291,6 +294,9 @@ patches:
               - mountPath: /usr/local/bin/git-ops-command.sh
                 name: git-ops-command
                 subPath: git-ops-command.sh
+              - name: helm-command
+                mountPath: /usr/local/bin/helm-command.sh
+                subPath: helm-command.sh
               - name: tools-dir
                 mountPath: /usr/local/bin/envsubst
                 subPath: envsubst
@@ -368,6 +374,10 @@ patches:
             configMap:
               name: git-ops-command
               defaultMode: 0555
+          - name: helm-command
+            configMap:
+              name: helm-command
+              defaultMode: 0555
           - name: install-custom-tools
             configMap:
               name: install-custom-tools
@@ -401,7 +411,7 @@ patches:
         spec:
           initContainers:
           - name: argocd-bootstrap
-            image: public.ecr.aws/r2h3l6e4/pingcloud-services/argocd-bootstrap/dev:v2.1-release-branch-latest
+            image: public.ecr.aws/r2h3l6e4/pingcloud-services/argocd-bootstrap/dev:v2.0-release-branch-latest
             imagePullPolicy: Always
             envFrom:
               - configMapRef:
@@ -417,7 +427,7 @@ patches:
         spec:
           initContainers:
           - name: argocd-p1as-oauth
-            image: public.ecr.aws/r2h3l6e4/pingcloud-services/p14c-integration/dev:v2.1-release-branch-latest
+            image: public.ecr.aws/r2h3l6e4/pingcloud-services/p14c-integration/dev:v2.0-release-branch-latest
             imagePullPolicy: Always
             securityContext:
               allowPrivilegeEscalation: false
