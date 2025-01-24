@@ -19,7 +19,7 @@ rm -rf /var/lib/apt/lists/*
 cp /usr/bin/envsubst /tools
 
 ### Install specific Kustomize versions - one for backwards compatibility as well as a new version ###
-KUSTOMIZE_COMP_VERSION="5.0.3"
+KUSTOMIZE_COMPATIBILITY_VERSION="5.0.3"
 KUSTOMIZE_VERSION="5.5.0"
 
 if [ "`uname -m`" = "aarch64" ] ; then
@@ -29,7 +29,7 @@ else
 fi
 
 wget -qO /tools/kustomize_5_0_3 \
-    "https://ping-artifacts.s3.us-west-2.amazonaws.com/pingcommon/kustomize/${KUSTOMIZE_COMP_VERSION}/${ARCH}/kustomize"
+    "https://ping-artifacts.s3.us-west-2.amazonaws.com/pingcommon/kustomize/${KUSTOMIZE_COMPATIBILITY_VERSION}/${ARCH}/kustomize"
 chmod a+x /tools/kustomize_5_0_3
 
 wget -qO /tools/kustomize \
