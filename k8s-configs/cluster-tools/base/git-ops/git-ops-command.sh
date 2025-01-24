@@ -185,6 +185,9 @@ disable_os_operator_crds() {
     done
 }
 
+########################################################################################################################
+# Get the P1AS version from the version.txt located in the cluster-state-repo
+########################################################################################################################
 get_version() {
   local version_file_path=""
   # Use TARGET_DIR to get full path of version file in case git-ops-command is not running within the cluster-state-repo
@@ -192,6 +195,9 @@ get_version() {
   cat "${version_file_path}"
 }
 
+########################################################################################################################
+# Set the Kustomize version based on the P1AS version
+########################################################################################################################
 set_kustomize_version() {
   # P1AS version 2.0.* and earlier require Kustomize version 5.0.3 which also requires a custom helm command to properly
   # Use OCI registries - see https://github.com/kubernetes-sigs/kustomize/issues/4381
@@ -199,6 +205,23 @@ set_kustomize_version() {
     KUSTOMIZE_EXECUTABLE="kustomize_5_0_3"
   else
     KUSTOMIZE_EXECUTABLE="kustomize"
+  fi
+
+  if ! command -v "${KUSTOMIZE_EXECUTABLE}"; then
+    log "Error: Kustomize executable '${KUSTOMIZE_EXECUTABLE}' not found. Make sure it is installed with the name shown"
+    exit 1
+  fi
+}
+
+########################################################################################################################
+# Previous versions of kustomize did not work properly with helm and had to use a custom helm-command.sh
+# Set this as part of the global $HELM_FLAGS variable for use with Kustomize when using Helm
+########################################################################################################################
+set_helm_flags() {
+  if [[ "${KUSTOMIZE_EXECUTABLE}" == "kustomize_5_0_3" ]]; then
+    HELM_FLAGS="--enable-helm --helm-command helm-command.sh"
+  else
+    HELM_FLAGS="--enable-helm"
   fi
 }
 
@@ -224,23 +247,11 @@ on_terminate() {
   exit 0
 }
 
-# Main script
-
-trap on_terminate SIGTERM
-
+########################################################################################################################
+# Main loop for legacy "monorepo" - substitutes variables, clones remote repo, replaces remote repo URL with local repo
+# Generates the "uber yaml" used to apply all manifests minus the microservices
+########################################################################################################################
 monorepo_main() {
-  # # Check for correct kustomize version
-  # # Kustomize version returned contains 'v' prefix, so we ignore that for consistency sake across references to version
-  # KUSTOMIZE_VERSION="5.5.0"
-  # if ! kustomize version | grep -q "${KUSTOMIZE_VERSION}"; then
-  #   log "Error: Kustomize version must be ${KUSTOMIZE_VERSION}"
-  #   exit 1
-  # fi
-
-  if [[ $(lowercase "${DEBUG}") != "true" ]]; then
-    # Trap all exit codes from here on so cleanup is run
-    trap "cleanup" EXIT
-  fi
 
   # Get short and full directory names of the target directory
   TARGET_DIR_FULL="$(pwd)"
@@ -353,16 +364,22 @@ monorepo_main() {
   exit 0
 }
 
-# This function is designed to work ONLY from ArgoCD. If you want to run it directly, manually, you must make sure you are
-# already in a MICROSERVICE/REGION directory before running.
-# You must also have the helm-command.sh file in your $PATH
+########################################################################################################################
+# Main loop for microservices
+# This function is designed to work ONLY from ArgoCD. If you want to run it directly, manually, you must make sure
+# you are already in a MICROSERVICE/REGION directory before running.
+# You must also have the helm-command.sh file in your $PATH if running older versions of Kustomize.
+########################################################################################################################
 microservice_main() {
-  eval "${KUSTOMIZE_EXECUTABLE} build --load-restrictor LoadRestrictionsNone --enable-helm --helm-command helm-command.sh"
+  eval "${KUSTOMIZE_EXECUTABLE} build --load-restrictor LoadRestrictionsNone ${HELM_FLAGS}"
 }
 
+########################################################################################################################
+# Main loop - determines if monorepo or microservice
 # If the current working directory contains k8s-deploy, then we assume we are building the monorepo
 # We cannot check for args $1 because ArgoCD works without passing in a path and assumes it's building the current
 # directory - see $TARGET_DIR's default value
+########################################################################################################################
 main () {
   TARGET_DIR="${1:-.}"
   cd "${TARGET_DIR}" >/dev/null 2>&1
@@ -378,8 +395,17 @@ main () {
   # Otherwise, we are building a microservice
   else
     log "Current working directory is ${PWD} which does NOT contain k8s-configs, so building this as a microservice"
+    set_helm_flags
     microservice_main
   fi
 }
+
+# Make sure we handle SIGTERMs from ArgoCD gracefully
+trap on_terminate SIGTERM
+
+if [[ $(lowercase "${DEBUG}") != "true" ]]; then
+  # Trap all exit codes from here on so cleanup is run
+  trap "cleanup" EXIT
+fi
 
 main "$@"
