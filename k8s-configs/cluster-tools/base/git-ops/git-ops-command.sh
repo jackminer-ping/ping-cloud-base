@@ -202,16 +202,20 @@ set_kustomize_version() {
   # P1AS version 2.0.* and earlier require Kustomize version 5.0.3 due to use of empty kustomize files as well as
   # helm compatibility issues and our desire to remove the helm-command.sh shim in future versions
   if [[ "${P1AS_VERSION}" =~ ^v((1\.*)|(2\.0)).* ]]; then
+    kustomize_correct_version="5.0.3"
     KUSTOMIZE_EXECUTABLE="kustomize_5_0_3"
   else
+    kustomize_correct_version="5.5.0"
     KUSTOMIZE_EXECUTABLE="kustomize"
-    # Check version of kustomize if not using compatibility version
-    kustomize_version="5.5.0"
-    if ! kustomize version | grep -q "${kustomize_version}"; then
-      log "Error: Kustomize version must be ${kustomize_version}"
-      exit 1
-    fi
   fi
+
+  # Sanity check version of kustomize
+  if ! eval "${KUSTOMIZE_EXECUTABLE} version" | grep -q "${kustomize_correct_version}"; then
+    log "Error: Kustomize version must be ${kustomize_correct_version}"
+    exit 1
+  fi
+
+  log "Using Kustomize version ${kustomize_correct_version}"
 
   if ! command -v "${KUSTOMIZE_EXECUTABLE}" > /dev/null 2>&1; then
     log "Error: Kustomize executable '${KUSTOMIZE_EXECUTABLE}' not found. Make sure it is installed with the name shown"
