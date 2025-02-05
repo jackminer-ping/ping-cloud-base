@@ -240,10 +240,13 @@ set_helm_flags() {
 # directory. Delete the kustomize build directory, if it exists.
 ########################################################################################################################
 cleanup() {
+  # Capture exit code captured by cleanup
+  exit_code=$?
   test $? -ne 0 && cat "${LOG_FILE}"
   rm -f "${LOG_FILE}"
   cd - >/dev/null 2>&1
   test ! -z "${TMP_DIR}" && rm -rf "${TMP_DIR}"
+  exit $exit_code
 }
 
 ########################################################################################################################
