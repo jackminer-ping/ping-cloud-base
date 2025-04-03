@@ -1,7 +1,7 @@
 kind: Kustomization
 apiVersion: kustomize.config.k8s.io/v1beta1
 
-namespace: ${PING_CLOUD_NAMESPACE}
+# namespace: ${PING_CLOUD_NAMESPACE}
 
 resources:
   - ../base/custom-resources
@@ -17,16 +17,16 @@ helmCharts:
     repo: oci://${ECR_REGISTRY_NAME}/dev
 
 ### This field is used to trigger a resync of the p1as-cluster-tools helm chart ###
-configMapGenerator:
-  - name: cluster-tools-last-update-reason
-    literals:
-      - UPDATE_REASON=""
-  ### This is needed for the empty custom-patches.yaml file to work ###
-  - name: cluster-tools-custom-placeholder
-  ### This is needed for the empty custom-patches.yaml file to work in base folder ###
-  - name: cluster-tools-custom-placeholder-base
+# configMapGenerator:
+#   - name: cluster-tools-last-update-reason
+#     literals:
+#       - UPDATE_REASON=""
+#   ### This is needed for the empty custom-patches.yaml file to work ###
+#   - name: cluster-tools-custom-placeholder
+#   ### This is needed for the empty custom-patches.yaml file to work in base folder ###
+#   - name: cluster-tools-custom-placeholder-base
 
-patchesStrategicMerge:
-  ### PS/GSO customizations to OOTB resources should only go into this file. Otherwise, CSR auto-updates will break. ###
-  - custom-patches.yaml
-  - ../base/custom-patches.yaml
+# patchesStrategicMerge:
+#   ### PS/GSO customizations to OOTB resources should only go into this file. Otherwise, CSR auto-updates will break. ###
+#   - custom-patches.yaml
+#   - ../base/custom-patches.yaml
