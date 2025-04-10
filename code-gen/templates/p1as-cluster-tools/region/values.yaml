@@ -6,3 +6,11 @@ ingress-nginx-public:
       # Needed to remove the controller name so the service name matches the existing service name
       # otherwise it will be "ingress-nginx-controller" (controller is the default value)
       name: ""
+ingress-nginx-private:
+  ingress-nginx:
+    # Needed to override the name so it matches the existing service name
+    fullnameOverride: "ingress-nginx"
+    controller:
+      # Needed to remove the controller name so the service name matches the existing service name
+      # otherwise it will be "ingress-nginx-controller" (controller is the default value)
+      name: ""
