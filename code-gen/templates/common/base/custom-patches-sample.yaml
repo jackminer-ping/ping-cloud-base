@@ -575,21 +575,6 @@ metadata:
 ---
 
 ################################################
-#                Karpenter
-################################################
-### The karpenter will stay disabled until all customers have been upgraded.
-### Scale down cluster-autoscaler replicas to zero
-apiVersion: apps/v1
-kind: Deployment
-metadata:
-  name: cluster-autoscaler
-  namespace: kube-system
-spec:
-  replicas: 0
-
----
-
-################################################
 #                ArgoCD
 ################################################
 # The custom logging verbosity level for the below pods is added. So we don’t need to implement it from scratch.
