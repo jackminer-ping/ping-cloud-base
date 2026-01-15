@@ -20,7 +20,6 @@ _Changes:_
 - [X] PDO-10077 Upgrade cluster-autoscaler to version 1.34
 - [X] PDO-10816 Upgrade external-dns to version v0.20.0
 
-
 ### 2.2.0
 
 - OSD: Enable Save Query and CSV Export of Logs
