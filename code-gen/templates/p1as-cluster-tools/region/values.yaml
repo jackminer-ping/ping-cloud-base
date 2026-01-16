@@ -26,3 +26,46 @@ ingress-nginx-private:
         minReplicas: 1
         maxReplicas: 1
         targetCPUUtilizationPercentage: 70
+
+
+# Karpenter configuration
+karpenter:
+  # Controller settings
+  karpenter-controller:
+    fullnameOverride: karpenter
+    settings:
+      clusterName: ${CLUSTER_NAME}
+    serviceAccount:
+      # name: "karpenter-shauntest"
+      annotations:
+        # eks.amazonaws.com/role-arn: "arn:aws:iam::705370621539:role/shaunmills-primary-KarpenterControllerRole"
+        ${KARPENTER_ROLE_ANNOTATION_KEY_VALUE}
+  # Node pool configurations
+  nodePools:
+    default:
+    #   requirements:
+    #     - key: "karpenter.k8s.aws/instance-category"
+    #       operator: In
+    #       values: ["c", "m", "r", "t"]
+    #     - key: "kubernetes.io/arch"
+    #       operator: In
+    #       values: ["arm64"]
+    #     - key: "karpenter.sh/capacity-type"
+    #       operator: In
+    #       values: ["spot", "on-demand"]
+    #     - key: kubernetes.io/os
+    #       operator: In
+    #       values: ["linux"]
+    #   disruption:
+    #     consolidationPolicy: WhenEmpty
+    #     consolidateAfter: 30s
+    pd_only:
+    #   limits:
+    #     cpu: "60"
+    #     memory: 500Gi
+    #   disruption:
+    #     consolidationPolicy: WhenEmpty
+    #     consolidateAfter: 33s
+  # Ec2NodeClass definitions
+  ec2NodeClass:
+    instanceProfile: "shaunmills-primary-KarpenterInstanceProfile"
