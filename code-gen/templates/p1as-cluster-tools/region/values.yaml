@@ -1,7 +1,7 @@
 # p1as-cluster-tools values
 
 global:
-  karpenterEnabled: false
+  karpenterEnabled: true
 
 # ingress-nginx-public values
 ingress-nginx-public:
