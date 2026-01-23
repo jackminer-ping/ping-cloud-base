@@ -23,6 +23,7 @@ helmCharts:
       ecrRegistryName: "705370621539.dkr.ecr.us-west-2.amazonaws.com/dev"
       profileBranch: v2.3-pdo10497-sm
     repo: oci://705370621539.dkr.ecr.us-west-2.amazonaws.com/dev
+    includeCRDs: true
 
 
 ### This field is used to trigger a resync of the p1as-cluster-tools helm chart ###
