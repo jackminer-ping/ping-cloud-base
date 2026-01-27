@@ -43,6 +43,7 @@ karpenter:
   # Node pool configurations
   nodePools:
     default:
+    pdOnly:
   # Ec2NodeClass definitions
   ec2NodeClass:
     instanceProfile: "shaunmills-primary-KarpenterInstanceProfile"
