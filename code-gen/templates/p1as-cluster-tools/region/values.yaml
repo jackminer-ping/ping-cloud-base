@@ -39,10 +39,6 @@ karpenter:
       annotations:
         # eks.amazonaws.com/role-arn: "arn:aws:iam::705370621539:role/shaunmills-primary-KarpenterControllerRole"
         ${KARPENTER_ROLE_ANNOTATION_KEY_VALUE}
-  # Node pool configurations
-  nodePools:
-    default:
-    pdOnly:
   # Ec2NodeClass definitions
   ec2NodeClass:
     instanceProfile: "${KARPENTER_INSTANCE_PROFILE}"
