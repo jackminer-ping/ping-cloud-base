@@ -146,3 +146,4 @@ spec:
           - RespectIgnoreDifferences=true  # Argo CD will not apply Git changes to the fields marked under ignoreDifferences..
           - ServerSideApply=true # get around custom karpenter crds annotion limits
           - SkipDryRunOnMissingResource=true
+          - Replace=true # needed for karpenter crd updates
