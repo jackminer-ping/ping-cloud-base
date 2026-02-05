@@ -32,7 +32,6 @@ ingress-nginx-private:
 karpenter:
   # Controller settings
   karpenter-controller:
-    fullnameOverride: karpenter
     settings:
       clusterName: ${CLUSTER_NAME}
     serviceAccount:
@@ -46,4 +45,4 @@ karpenter:
     pdOnly:
   # Ec2NodeClass definitions
   ec2NodeClass:
-    instanceProfile: "shaunmills-primary-KarpenterInstanceProfile"
+    instanceProfile: "${KARPENTER_INSTANCE_PROFILE}"
