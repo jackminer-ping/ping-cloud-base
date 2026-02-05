@@ -9,7 +9,9 @@ metadata:
 
 ---
 #######################################################################################################
-# Option 1:
+# Option 1: 
+# Karpenter CRD patches to get around k8s annotation limits and allow ArgoCD to update the karpenter CRDs without manual intervention
+#
 # We keep using the bundled karpenter CRDs from the helm chart, but add these patches to get around k8s annotation limits
 # Since the bundled crds are static files that we cannot change this patch was necessary to add these annotations via kustomize
 #
@@ -17,8 +19,6 @@ metadata:
 # https://github.com/aws/karpenter-provider-aws/tree/release-v1.0.11/charts/karpenter/crds 
 # which references the following crds:
 # https://github.com/aws/karpenter-provider-aws/tree/release-v1.0.11/pkg/apis/crds
-#
-# Karpenter CRD patches to get around k8s annotation limits and allow ArgoCD to update the karpenter CRDs without manual intervention
 #
 ########################################################################################################
 
