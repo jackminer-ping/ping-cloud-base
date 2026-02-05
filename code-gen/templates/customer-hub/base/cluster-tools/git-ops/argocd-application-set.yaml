@@ -32,21 +32,21 @@ spec:
           kind: Job
           jsonPointers:
             - /spec/ttlSecondsAfterFinished
+        # ignore karpenter crd
+        - group: karpenter.sh
+          kind: CustomResourceDefinition
+        - group: karpenter.k8s.aws
+          kind: CustomResourceDefinition
+        - group: karpenter.sh
+          kind: NodePool
+        - group: karpenter.k8s.aws
+          kind: EC2NodeClass
       syncPolicy:
         automated:
           prune: true
         syncOptions:
           # Only apply changes which are out of sync, since the uber yaml is so large
           - ApplyOutOfSyncOnly=true
-          # ignore karpenter crd
-          - group: karpenter.sh
-            kind: CustomResourceDefinition
-          - group: karpenter.k8s.aws
-            kind: CustomResourceDefinition
-          - group: karpenter.sh
-            kind: NodePool
-          - group: karpenter.k8s.aws
-            kind: EC2NodeClass
       destination:
         server: "{{server}}"
       project: default
