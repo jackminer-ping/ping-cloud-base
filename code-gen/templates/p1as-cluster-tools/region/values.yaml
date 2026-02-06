@@ -41,9 +41,7 @@ karpenter:
     settings:
       clusterName: ${CLUSTER_NAME}
     serviceAccount:
-      # name: "karpenter-shauntest"
       annotations:
-        # eks.amazonaws.com/role-arn: "arn:aws:iam::705370621539:role/shaunmills-primary-KarpenterControllerRole"
         ${KARPENTER_ROLE_ANNOTATION_KEY_VALUE}
   # Ec2NodeClass definitions
   ec2NodeClass:
