@@ -45,9 +45,7 @@ patches:
   ### PS/GSO customizations to OOTB resources should only go into this file. Otherwise, CSR auto-updates will break. ###
   - path: custom-patches.yaml
   - path: ../base/custom-patches.yaml
-
-### Overide Karpenter namespace overwise PCB ci/cd will try to install this into devtools-ci ns and throw errors
-patches:
+  
   # Override Karpenter CRD webhook service namespace to kube-system
   - target:
       group: apiextensions.k8s.io
