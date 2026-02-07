@@ -64,6 +64,15 @@ patches:
       - op: replace
         path: /metadata/namespace
         value: kube-system
+  # Ensure karpenter-lease role is in kube-node-lease ns since karpenter 
+  # Karpenter needs this for Node lifetime management (liveness monitoring, fast termination)
+  - target:
+        name: karpenter-lease
+        kind: Role
+    patch: |-
+      - op: replace
+        path: /metadata/namespace
+        value: kube-node-lease
 
 patchesStrategicMerge:
   ### sigsci-agent patch to substitute container environment variables
