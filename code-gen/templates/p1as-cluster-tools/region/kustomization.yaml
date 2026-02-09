@@ -56,8 +56,9 @@ configMapGenerator:
     namespace: ${PING_CLOUD_NAMESPACE}
 
 patches:
-  ### Karpenter CRD patch
-  # - path: ../base/karpenter-crd.yaml
+  ### Karpenter CRD patch for version 1.0.11 since karpenter-crd helm chart does not support adding annotations which are necessary
+  # for ArgoCD to manage the CRDs without manual intervention. otation limits and allow ArgoCD to update the karpenter CRDs without manual intervention. We are using Karpenter 1.0.11 helm chart which has the following crds:
+  - path: ../base/karpenter-crd.yaml
   ### PS/GSO customizations to OOTB resources should only go into this file. Otherwise, CSR auto-updates will break. ###
   - path: custom-patches.yaml
   - path: ../base/custom-patches.yaml
