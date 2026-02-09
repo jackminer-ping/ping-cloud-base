@@ -41,7 +41,6 @@ helmCharts:
     # includeCRDs: true
     namespace: kube-system
 
-
 ### This field is used to trigger a resync of the p1as-cluster-tools helm chart ###
 configMapGenerator:
   - name: cluster-tools-last-update-reason
@@ -64,34 +63,6 @@ patches:
   - path: custom-patches.yaml
   - path: ../base/custom-patches.yaml
   
-  # Override Karpenter CRD webhook service namespace to kube-system
-  # - target:
-  #     group: apiextensions.k8s.io
-  #     version: v1
-  #     kind: CustomResourceDefinition
-  #     name: (ec2nodeclasses|nodeclaims|nodepools).*
-  #   patch: |-
-  #     - op: replace
-  #       path: /spec/conversion/webhook/clientConfig/service/namespace
-  #       value: kube-system
-  # Override Karpenter namespace to kube-system
-  # - target:
-  #     # This targets every resource with the karpenter label
-  #     labelSelector: "app.kubernetes.io/instance=karpenter"
-  #   patch: |-
-  #     - op: replace
-  #       path: /metadata/namespace
-  #       value: kube-system
-  # Ensure karpenter-lease role is in kube-node-lease ns since karpenter 
-  # Karpenter needs this for Node lifetime management (liveness monitoring, fast termination)
-  # - target:
-  #       name: karpenter-lease
-  #       kind: Role
-  #   patch: |-
-  #     - op: replace
-  #       path: /metadata/namespace
-  #       value: kube-node-lease
-
 patchesStrategicMerge:
   ### sigsci-agent patch to substitute container environment variables
   - sigsci-agent.yaml

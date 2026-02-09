@@ -1,14 +1,12 @@
 #######################################################################################################
-# Option 1: 
+#
 # Karpenter CRD patches to get around k8s annotation limits and allow ArgoCD to update the karpenter CRDs without manual intervention
 #
-# We keep using the bundled karpenter CRDs from the helm chart, but add these patches to get around k8s annotation limits
-# Since the bundled crds are static files that we cannot change this patch was necessary to add these annotations via kustomize
+# ServerSideApply and Replace were necessary to get around k8s annotation limits since Karpenter CRDs are large resoruces
 #
-# We are using Karpenter 1.0.11 helm chart which has the following crds:
-# https://github.com/aws/karpenter-provider-aws/tree/release-v1.0.11/charts/karpenter/crds 
-# which references the following crds:
-# https://github.com/aws/karpenter-provider-aws/tree/release-v1.0.11/pkg/apis/crds
+# Karpenter CRD patch for version 1.0.11 since karpenter-crd helm chart does not support adding annotations which are necessary
+# for ArgoCD to sync Karpenter CRDs first before other Kaprenter resources that depend on the CRDs being present.
+# This is fixed in karpenter-crd helm chart v1.2.0+
 #
 ########################################################################################################
 
