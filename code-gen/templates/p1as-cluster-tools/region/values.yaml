@@ -35,7 +35,7 @@ ingress-nginx-private:
 
 
 # Karpenter configuration
-karpenter-controller:
+karpenterController:
   settings:
     clusterName: ${CLUSTER_NAME}
   serviceAccount:
