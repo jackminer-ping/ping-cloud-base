@@ -6,8 +6,8 @@ resources:
   - ../base/namespace.yaml
   - custom-resources
 
-# helmGlobals:
-#   configHome: /helm-working-dir
+helmGlobals:
+  configHome: /helm-working-dir
 
 helmCharts:
   - name: p1as-cluster-tools
@@ -16,14 +16,30 @@ helmCharts:
       - ../../values-files/base/values.yaml   # base values.yaml
       - ../../values-files/${REGION_NICK_NAME}/values.yaml   # regional values.yaml
       - values.yaml   # app specific values.yaml
-    version: v2.3-release-branch-latest
-    repo: oci://${ECR_REGISTRY_NAME}/dev
-    # version: v2.3-pdo10498-karpenter-crd-sm
-    # valuesInline:
-    #   ecrRegistryName: "705370621539.dkr.ecr.us-west-2.amazonaws.com/dev"
-    #   profileBranch: v2.3-pdo10498-karpenter-crd-sm
-    # repo: oci://705370621539.dkr.ecr.us-west-2.amazonaws.com/dev
-    includeCRDs: true
+    # version: v2.3-release-branch-latest
+    # repo: oci://${ECR_REGISTRY_NAME}/dev
+    version: v2.3-pdo10498-karpenter-crd-sm
+    valuesInline:
+      ecrRegistryName: "705370621539.dkr.ecr.us-west-2.amazonaws.com/dev"
+      profileBranch: v2.3-pdo10498-karpenter-crd-sm
+    repo: oci://705370621539.dkr.ecr.us-west-2.amazonaws.com/dev
+
+  # Needed to split Karpenter into its own microservice since the upstream chart
+  # does not allow namespace override
+  - name: p1as-karpenter
+    additionalValuesFiles:
+      - ../../values-files/base/values.yaml   # base values.yaml
+      - ../../values-files/${REGION_NICK_NAME}/values.yaml   # regional values.yaml
+      - values.yaml   # app specific values.yaml
+    # version: v0.27.1
+    # repo: oci://${ECR_REGISTRY_NAME}/dev
+    version: v2.3-pdo10498-karpenter-crd-sm
+    valuesInline:
+      ecrRegistryName: "705370621539.dkr.ecr.us-west-2.amazonaws.com/dev"
+      profileBranch: v2.3-pdo10498-karpenter-crd-sm
+    repo: oci://705370621539.dkr.ecr.us-west-2.amazonaws.com/dev
+    # includeCRDs: true
+    namespace: kube-system
 
 
 ### This field is used to trigger a resync of the p1as-cluster-tools helm chart ###
@@ -41,38 +57,38 @@ configMapGenerator:
 
 patches:
   ### Karpenter CRD patch
-  - path: ../base/karpenter-crd.yaml
+  # - path: ../base/karpenter-crd.yaml
   ### PS/GSO customizations to OOTB resources should only go into this file. Otherwise, CSR auto-updates will break. ###
   - path: custom-patches.yaml
   - path: ../base/custom-patches.yaml
   
   # Override Karpenter CRD webhook service namespace to kube-system
-  - target:
-      group: apiextensions.k8s.io
-      version: v1
-      kind: CustomResourceDefinition
-      name: (ec2nodeclasses|nodeclaims|nodepools).*
-    patch: |-
-      - op: replace
-        path: /spec/conversion/webhook/clientConfig/service/namespace
-        value: kube-system
+  # - target:
+  #     group: apiextensions.k8s.io
+  #     version: v1
+  #     kind: CustomResourceDefinition
+  #     name: (ec2nodeclasses|nodeclaims|nodepools).*
+  #   patch: |-
+  #     - op: replace
+  #       path: /spec/conversion/webhook/clientConfig/service/namespace
+  #       value: kube-system
   # Override Karpenter namespace to kube-system
-  - target:
-      # This targets every resource with the karpenter label
-      labelSelector: "app.kubernetes.io/instance=karpenter"
-    patch: |-
-      - op: replace
-        path: /metadata/namespace
-        value: kube-system
+  # - target:
+  #     # This targets every resource with the karpenter label
+  #     labelSelector: "app.kubernetes.io/instance=karpenter"
+  #   patch: |-
+  #     - op: replace
+  #       path: /metadata/namespace
+  #       value: kube-system
   # Ensure karpenter-lease role is in kube-node-lease ns since karpenter 
   # Karpenter needs this for Node lifetime management (liveness monitoring, fast termination)
-  - target:
-        name: karpenter-lease
-        kind: Role
-    patch: |-
-      - op: replace
-        path: /metadata/namespace
-        value: kube-node-lease
+  # - target:
+  #       name: karpenter-lease
+  #       kind: Role
+  #   patch: |-
+  #     - op: replace
+  #       path: /metadata/namespace
+  #       value: kube-node-lease
 
 patchesStrategicMerge:
   ### sigsci-agent patch to substitute container environment variables
