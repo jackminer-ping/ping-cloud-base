@@ -16,3 +16,79 @@ ingress-nginx-public:
         # and re-evaluating them for all environments in PDO-9757
         keep-alive-requests: "100000"
         upstream-keepalive-timeout: "30"
+
+# Karpenter
+karpenterController:
+  # GA NodePool settings
+  # Copied from ping-cloud-base/k8s-configs/cluster-tools/prod/large/karpenter/ga/kustomization.yaml.old
+  p1asNodePools:
+    enabled: true
+    default:
+      requirements:
+        - key: "karpenter.k8s.aws/instance-category"
+          operator: In
+          values: ["c"]
+        - key: "kubernetes.io/arch"
+          operator: In
+          values: ["arm64"]
+        - key: "karpenter.sh/capacity-type"
+          operator: In
+          values: ["on-demand"]
+        - key: kubernetes.io/os
+          operator: In
+          values: ["linux"]
+        - key: "karpenter.k8s.aws/instance-generation"
+          operator: In
+          values: ["7"]
+      # limits:
+      #   cpu: "300"
+      #   memory: 750Gi
+      # disruption:
+      #   consolidationPolicy: WhenEmpty
+      #   consolidateAfter: 30s
+    pdOnly:
+      requirements:
+        - key: "karpenter.k8s.aws/instance-category"
+          operator: In
+          values: ["r"]
+        - key: "kubernetes.io/arch"
+          operator: In
+          values: ["arm64"]
+        - key: "karpenter.sh/capacity-type"
+          operator: In
+          values: ["on-demand"]
+        - key: kubernetes.io/os
+          operator: In
+          values: ["linux"]
+        - key: "karpenter.k8s.aws/instance-generation"
+          operator: In
+          values: ["7"]
+      # limits:
+      #   cpu: "60"
+      #   memory: 500Gi
+      # disruption:
+      #   consolidationPolicy: WhenEmpty
+      #   consolidateAfter: 30s
+  # GA EC2NodeClass settings
+  p1asEC2NodeClass:
+    default:
+      # -- AMI family to use for provisioned nodes.
+      # amiFamily: AL2023
+      # amiSelectorTerms: al2023@latest
+      blockDeviceMappings:
+        - deviceName: /dev/xvda
+          ebs:
+            volumeSize: 120Gi
+            # volumeType: gp3
+            # encrypted: true
+    pdOnly:
+      # -- AMI family to use for provisioned nodes.
+      # amiFamily: AL2023
+      # amiSelectorTerms: al2023@latest
+      blockDeviceMappings:
+        - deviceName: /dev/xvda
+          ebs:
+            volumeSize: 120Gi
+            # volumeType: gp3
+            # encrypted: true
+  
