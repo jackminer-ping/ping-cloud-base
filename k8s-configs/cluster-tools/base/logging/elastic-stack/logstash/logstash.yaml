@@ -9,10 +9,6 @@ spec:
   podManagementPolicy: Parallel
   updateStrategy:
     type: RollingUpdate
-  # Have k8s clean up PVCs if scaled down, but retain pvcs if pods deleted for any other reason
-  persistentVolumeClaimRetentionPolicy:
-    whenDeleted: Retain
-    whenScaled: Delete
   selector:
     matchLabels:
       app: logstash-elastic
