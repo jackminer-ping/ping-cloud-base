@@ -24,7 +24,7 @@ helmCharts:
       profileBranch: v2.3-pdo10498-karpenter-crd-sm
     repo: oci://705370621539.dkr.ecr.us-west-2.amazonaws.com/dev
 
-  # Needed to split Karpenter into its own microservice since the upstream chart
+  # Needed to split Karpenter into its own helm chart since the upstream chart
   # does not allow namespace override
   - name: p1as-karpenter
     additionalValuesFiles:
@@ -34,12 +34,13 @@ helmCharts:
     # version: v0.27.1
     # repo: oci://${ECR_REGISTRY_NAME}/dev
     version: v2.3-pdo10498-karpenter-crd-sm
+    namespace: kube-system
     valuesInline:
       ecrRegistryName: "705370621539.dkr.ecr.us-west-2.amazonaws.com/dev"
       profileBranch: v2.3-pdo10498-karpenter-crd-sm
     repo: oci://705370621539.dkr.ecr.us-west-2.amazonaws.com/dev
-    # includeCRDs: true
-    namespace: kube-system
+    # Karpenter CRDs controled in values.yaml with the KarpenterCrdEnabled key
+    includeCRDs: false
 
 ### This field is used to trigger a resync of the p1as-cluster-tools helm chart ###
 configMapGenerator:
@@ -55,9 +56,6 @@ configMapGenerator:
     namespace: ${PING_CLOUD_NAMESPACE}
 
 patches:
-  ### Karpenter CRD patch for version 1.0.11 since karpenter-crd helm chart does not support adding annotations which are necessary
-  # for ArgoCD to manage the CRDs without manual intervention.
-  # This is fixed in karpenter-crd helm chart v1.2.0+
   - path: ../base/karpenter-crd.yaml
   ### PS/GSO customizations to OOTB resources should only go into this file. Otherwise, CSR auto-updates will break. ###
   - path: custom-patches.yaml
