@@ -16,4 +16,3 @@ ingress-nginx-public:
         # and re-evaluating them for all environments in PDO-9757
         keep-alive-requests: "100000"
         upstream-keepalive-timeout: "30"
-  
