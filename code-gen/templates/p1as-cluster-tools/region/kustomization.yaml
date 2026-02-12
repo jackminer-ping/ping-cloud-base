@@ -15,7 +15,6 @@ helmCharts:
       - values.yaml   # app specific values.yaml
     version: v2.3-release-branch-latest
     repo: oci://${ECR_REGISTRY_NAME}/dev
-    repo: oci://705370621539.dkr.ecr.us-west-2.amazonaws.com/dev
 
   # Needed to split Karpenter into its own helm chart since the upstream chart
   # does not allow namespace override
