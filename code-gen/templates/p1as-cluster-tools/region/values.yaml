@@ -32,7 +32,6 @@ ingress-nginx-private:
         maxReplicas: 1
         targetCPUUtilizationPercentage: 70
 
-
 # Karpenter configuration
 karpenterController:
   settings:
