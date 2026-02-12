@@ -6,9 +6,6 @@ resources:
   - ../base/namespace.yaml
   - custom-resources
 
-helmGlobals:
-  configHome: /helm-working-dir
-
 helmCharts:
   - name: p1as-cluster-tools
     releaseName: p1as-cluster-tools
@@ -16,12 +13,8 @@ helmCharts:
       - ../../values-files/base/values.yaml   # base values.yaml
       - ../../values-files/${REGION_NICK_NAME}/values.yaml   # regional values.yaml
       - values.yaml   # app specific values.yaml
-    # version: v2.3-release-branch-latest
-    # repo: oci://${ECR_REGISTRY_NAME}/dev
-    version: v2.3-pdo10498-karpenter-crd-sm
-    valuesInline:
-      ecrRegistryName: "705370621539.dkr.ecr.us-west-2.amazonaws.com/dev"
-      profileBranch: v2.3-pdo10498-karpenter-crd-sm
+    version: v2.3-release-branch-latest
+    repo: oci://${ECR_REGISTRY_NAME}/dev
     repo: oci://705370621539.dkr.ecr.us-west-2.amazonaws.com/dev
 
   # Needed to split Karpenter into its own helm chart since the upstream chart
@@ -31,14 +24,9 @@ helmCharts:
       - ../../values-files/base/values.yaml   # base values.yaml
       - ../../values-files/${REGION_NICK_NAME}/values.yaml   # regional values.yaml
       - values.yaml   # app specific values.yaml
-    # version: v0.27.1
-    # repo: oci://${ECR_REGISTRY_NAME}/dev
-    version: v2.3-pdo10498-karpenter-crd-sm
+    version: v2.3-release-branch-latest
+    repo: oci://${ECR_REGISTRY_NAME}/dev
     namespace: kube-system
-    valuesInline:
-      ecrRegistryName: "705370621539.dkr.ecr.us-west-2.amazonaws.com/dev"
-      profileBranch: v2.3-pdo10498-karpenter-crd-sm
-    repo: oci://705370621539.dkr.ecr.us-west-2.amazonaws.com/dev
     # Karpenter CRDs controled in values.yaml with the KarpenterCrdEnabled key
     includeCRDs: false
 
