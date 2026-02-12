@@ -56,7 +56,9 @@ configMapGenerator:
     namespace: ${PING_CLOUD_NAMESPACE}
 
 patches:
-  - path: ../base/karpenter-crd.yaml
+  # Disabled karpenter-crd patch since Karpenter is disabled by default in values.yaml
+  # Uncomment this after enabling Karpenter in values.yaml
+  # - path: ../base/karpenter-crd.yaml
   ### PS/GSO customizations to OOTB resources should only go into this file. Otherwise, CSR auto-updates will break. ###
   - path: custom-patches.yaml
   - path: ../base/custom-patches.yaml
