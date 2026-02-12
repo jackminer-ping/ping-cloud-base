@@ -5,8 +5,8 @@ global:
   # Instead of using the bundled crds in karpenter helm chart 
   # we can use karpenter-crd helm chart which may make karpenter upgrades easier
   ###########################################################
-  karpenterCrdEnabled: true
-  karpenterEnabled: true
+  karpenterCrdEnabled: false
+  karpenterEnabled: false
 
 # ingress-nginx-public values
 ingress-nginx-public:
@@ -40,6 +40,9 @@ karpenterController:
   serviceAccount:
     annotations:
       ${KARPENTER_ROLE_ANNOTATION_KEY_VALUE}
+  # Nodepool configuration
+  p1asNodePools:
+    enabled: true
   # Ec2NodeClass definitions
   p1asEC2NodeClass:
     instanceProfile: "${KARPENTER_INSTANCE_PROFILE}"
