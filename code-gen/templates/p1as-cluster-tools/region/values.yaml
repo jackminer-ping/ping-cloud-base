@@ -41,7 +41,7 @@ karpenterController:
       ${KARPENTER_ROLE_ANNOTATION_KEY_VALUE}
   # Nodepool configuration
   p1asNodePools:
-    enabled: true
+    enabled: false
   # Ec2NodeClass definitions
   p1asEC2NodeClass:
     instanceProfile: "${KARPENTER_INSTANCE_PROFILE}"
