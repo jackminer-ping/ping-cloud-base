@@ -2,6 +2,10 @@
 
 ### 2.4.0
 
+- Run the git-ops-command CMP sidecar on the argocd-init-tools image (which has a
+  natively-built python3/git-remote-codecommit/envsubst) instead of the plain ArgoCD
+  image, enabling git clone from private AWS CodeCommit repositories (e.g. for
+  K8S_GIT_URL) in addition to public repositories
 - Add deploy wrapper to capture deploy failure logs
 - Introduce 'revisionHistoryLimit' of 0 replicas to DA deployment to avoid cluster cluttering
 - Update pod-reaper and httpbin images
@@ -17,6 +21,7 @@
 
 _Changes:_
 
+- [X] PDO-XXXXX Support git clone from private CodeCommit repository for git-ops-command.sh
 - [X] PDO-7316 JSON Logging: Implement JSON logging for PingDelegator logs
 - [X] PDO-7374 JSON Logging: Implement JSON logging for PingCentral
 - [X] PDO-8875 Add deploy wrapper to capture deploy failure logs

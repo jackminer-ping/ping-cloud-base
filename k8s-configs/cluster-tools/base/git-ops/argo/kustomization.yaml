@@ -275,8 +275,12 @@ patches:
           containers:
           - name: git-ops-command
             command: [/var/run/argocd/argocd-cmp-server] # Entrypoint should be Argo CD lightweight CMP server i.e. argocd-cmp-server
-            # We don't need to use the full ArgoCD image here but we use it for consistency sake when installing all of the tools for both containers.
-            image: public.ecr.aws/r2h3l6e4/pingcloud-clustertools/argo/argocd:v2.12.4
+            # We don't need to use the full ArgoCD image here; argocd-cmp-server itself is copied in at
+            # runtime by the copyutil init container via the var-files volume below. This image already has a
+            # natively-built python3/pip/git-remote-codecommit/envsubst (see argocd-init-tools's Dockerfile), so
+            # git-ops-command.sh can git clone from private AWS CodeCommit repositories without relying on
+            # anything from the ArgoCD image itself.
+            image: public.ecr.aws/r2h3l6e4/pingcloud-services/argocd-init-tools:v1.1.0
             securityContext:
               runAsNonRoot: true
               runAsUser: 999
@@ -306,21 +310,15 @@ patches:
               - name: helm-command
                 mountPath: /usr/local/bin/helm-command.sh
                 subPath: helm-command.sh
-              - name: tools-dir
-                mountPath: /usr/local/bin/envsubst
-                subPath: envsubst
+              # envsubst and git-remote-codecommit are already natively present on the argocd-init-tools image
+              # above (no need to mount them in from tools-dir here as is done for the main repo-server
+              # container). kustomize/kustomize_5_0_3 aren't baked into that image, so still mount those.
               - name: tools-dir
                 mountPath: /usr/local/bin/kustomize
                 subPath: kustomize
               - name: tools-dir
                 mountPath: /usr/local/bin/kustomize_5_0_3
                 subPath: kustomize_5_0_3
-              - name: tools-dir
-                mountPath: /usr/local/bin/git-remote-codecommit
-                subPath: git-remote-codecommit
-              - name: tools-dir
-                mountPath: /home/argocd/.local/lib/python3.7/site-packages/git_remote_codecommit/__init__.py
-                subPath: __init__.py
               - name: helm-working-dir
                 mountPath: /helm-working-dir
             resources:
