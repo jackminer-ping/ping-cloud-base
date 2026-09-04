@@ -280,7 +280,8 @@ patches:
             # natively-built python3/pip/git-remote-codecommit/envsubst (see argocd-init-tools's Dockerfile), so
             # git-ops-command.sh can git clone from private AWS CodeCommit repositories without relying on
             # anything from the ArgoCD image itself.
-            image: public.ecr.aws/r2h3l6e4/pingcloud-services/argocd-init-tools:v1.1.0
+            #image: public.ecr.aws/r2h3l6e4/pingcloud-services/argocd-init-tools:v1.1.0
+            image: 705370621539.dkr.ecr.us-west-2.amazonaws.com/pingcloud-services/argocd-init-tools:v1.1.0-codecommit-python-argocd-image
             securityContext:
               runAsNonRoot: true
               runAsUser: 999
